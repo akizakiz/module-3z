@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "tracks": [
+    {
+      "id": "music-hub",
+      "src": "assets/sounds/music-hub.mp3",
+      "type": "ambient",
+      "loop": true
+    }
+  ],
+  "sfx": [
+    { "id": "clay", "type": "procedural" },
+    { "id": "chisel", "type": "procedural" },
+    { "id": "papyrus", "type": "procedural" },
+    { "id": "water", "type": "procedural" },
+    { "id": "coins", "type": "procedural" },
+    { "id": "fanfare", "type": "procedural" }
+  ]
+}

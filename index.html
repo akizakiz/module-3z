@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Les Chroniques du Croissant Fertile · Histoire 1re Secondaire (Québec) · Module 3</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <!-- CANEVAS DES PARTICULES D'AMBIANCE -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- BANNIÈRE FLOTTANTE MODE DÉMO ENSEIGNANT -->
+    <div id="teacher-demo-badge" class="teacher-demo-badge" style="display: none;">
+        🎓 Mode Démo Enseignant (Sans Spoilers de Choix)
+    </div>
+
+    <!-- CONTENEUR DU JEU -->
+    <div id="game-app">
+        
+        <!-- BARRE SUPÉRIEURE (HUD) -->
+        <header class="game-hud" id="game-hud" style="display: none;">
+            <div class="hud-left">
+                <div class="hero-avatar" id="hud-hero-avatar" title="Votre personnage historique">
+                    <img id="hud-hero-avatar-img" src="assets/images/char_hero_scribe.jpg" alt="Héros">
+                </div>
+                <div class="hero-info" id="hud-hero-info">
+                    <div class="hero-name" id="hud-hero-name">Gilgamesh</div>
+                    <div class="hero-class" id="hud-hero-class">Scribe Royal</div>
+                </div>
+            </div>
+
+            <!-- JAUGES DE STATUT -->
+            <div class="hud-gauges" id="hud-gauges">
+                <div class="gauge-item gauge-savoir" id="gauge-box-savoir" title="Savoir : Compréhension de l'écriture, des lois et de la culture">
+                    <div class="gauge-header">
+                        <span class="gauge-icon">📖</span>
+                        <span class="gauge-label">Savoir</span>
+                        <span id="gauge-val-savoir" class="gauge-val">50%</span>
+                    </div>
+                    <div class="gauge-bar-bg">
+                        <div class="gauge-bar-fill" id="gauge-fill-savoir" style="width: 50%;"></div>
+                    </div>
+                </div>
+
+                <div class="gauge-item gauge-influence" id="gauge-box-influence" title="Influence : Réputation auprès du Roi, des prêtres et du peuple">
+                    <div class="gauge-header">
+                        <span class="gauge-icon">👑</span>
+                        <span class="gauge-label">Influence</span>
+                        <span id="gauge-val-influence" class="gauge-val">50%</span>
+                    </div>
+                    <div class="gauge-bar-bg">
+                        <div class="gauge-bar-fill" id="gauge-fill-influence" style="width: 50%;"></div>
+                    </div>
+                </div>
+
+                <div class="gauge-item gauge-richesse" id="gauge-box-richesse" title="Richesse : Gestion des surplus agricoles, troc et ressources">
+                    <div class="gauge-header">
+                        <span class="gauge-icon">🏺</span>
+                        <span class="gauge-label">Richesse</span>
+                        <span id="gauge-val-richesse" class="gauge-val">50%</span>
+                    </div>
+                    <div class="gauge-bar-bg">
+                        <div class="gauge-bar-fill" id="gauge-fill-richesse" style="width: 50%;"></div>
+                    </div>
+                </div>
+
+                <div class="gauge-item gauge-destin" id="gauge-box-destin" title="Destin : Répercussions de vos choix et équilibre de la cité">
+                    <div class="gauge-header">
+                        <span class="gauge-icon">✨</span>
+                        <span class="gauge-label">Destin</span>
+                        <span id="gauge-val-destin" class="gauge-val">50%</span>
+                    </div>
+                    <div class="gauge-bar-bg">
+                        <div class="gauge-bar-fill" id="gauge-fill-destin" style="width: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIONS HUD -->
+            <div class="hud-actions">
+                <button class="hud-btn" id="btn-medals" title="Voir les médailles et réussites">
+                    <span>🏆</span>
+                    <span class="hud-btn-text">Médailles</span>
+                </button>
+                <button class="hud-btn" id="btn-codex" title="Consulter le grimoire du savoir historique">
+                    <span>📜</span>
+                    <span class="hud-btn-text">Codex</span>
+                    <span class="codex-badge" id="codex-badge" style="display: none;">0</span>
+                </button>
+                <button class="hud-btn" id="btn-audio-modal-toggle" title="Réglages audio (Musique et bruitages)">
+                    <span id="audio-icon-span">🔊</span>
+                    <span class="hud-btn-text">Audio</span>
+                </button>
+                <button class="hud-btn" id="btn-fullscreen-toggle" title="Basculer en plein écran">
+                    <span id="fullscreen-icon">⛶</span>
+                    <span class="hud-btn-text" id="fullscreen-btn-text">Plein Écran</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- BARRE DE PROGRESSION GLOBALE DES 5 CHAPITRES -->
+        <div class="chapter-progress-container" id="chapter-progress-container" style="display: none;">
+            <div class="chapter-progress-bar">
+                <div class="ch-step active" data-step="1" id="ch-step-1">
+                    <span class="ch-num">I</span>
+                    <span class="ch-name">Origines</span>
+                </div>
+                <div class="ch-line"></div>
+                <div class="ch-step" data-step="2" id="ch-step-2">
+                    <span class="ch-num">II</span>
+                    <span class="ch-name">Cités-États</span>
+                </div>
+                <div class="ch-line"></div>
+                <div class="ch-step" data-step="3" id="ch-step-3">
+                    <span class="ch-num">III</span>
+                    <span class="ch-name">Ziggourat</span>
+                </div>
+                <div class="ch-line"></div>
+                <div class="ch-step" data-step="4" id="ch-step-4">
+                    <span class="ch-num">IV</span>
+                    <span class="ch-name">Babylone</span>
+                </div>
+                <div class="ch-line"></div>
+                <div class="ch-step" data-step="5" id="ch-step-5">
+                    <span class="ch-num">V</span>
+                    <span class="ch-name">Le Nil</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ZONE D'AFFICHAGE PRINCIPALE -->
+        <main class="screen-container">
+            
+            <!-- ÉCRAN D'ACCUEIL & SÉLECTION DE CLASSE -->
+            <section class="start-screen" id="start-screen">
+                <div class="game-logo-container">
+                    <h1 class="game-title">Les Chroniques du Croissant Fertile</h1>
+                    <div class="game-subtitle">L'Émergence d'une Civilisation</div>
+                    <div class="curriculum-badge">Histoire • 1re Secondaire (Québec) • Module 3</div>
+                </div>
+
+                <!-- BANNIÈRE DE REPRISE DE PARTIE (SI SAUVEGARDE EXISTE) -->
+                <div class="resume-game-box" id="resume-game-box" style="display: none;">
+                    <div class="resume-info">
+                        <span style="font-size: 1.5rem;">💾</span>
+                        <div>
+                            <strong>Partie en cours enregistrée</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);" id="resume-details-text">
+                                Reprendre l'aventure là où vous vous étiez arrêté.
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-resume-start" onclick="window.gameEngine.loadSavedGame()">Reprendre ma partie ➔</button>
+                </div>
+
+                <div class="start-intro-box">
+                    <p>
+                        Vers <strong>3500 av. J.-C.</strong>, sur les berges fertiles du <strong>Tigre</strong>, de l'<strong>Euphrate</strong> et du <strong>Nil</strong>, l'Humanité invente l'<strong>écriture</strong> et franchit le seuil de l'<strong>Antiquité</strong>.
+                    </p>
+                    <div class="quote-box">
+                        « Comment l'écriture a-t-elle permis à la civilisation mésopotamienne et aux premières cités-États de se développer ? »
+                    </div>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary);">
+                        Incarnez l'un des quatre archétypes de l'époque antique, prenez des décisions historiques cruciales, résolvez les énigmes des scribes et bâtissez votre destinée !
+                    </p>
+                </div>
+
+                <div class="class-selection-section">
+                    <h2 class="section-heading">Choisissez votre Classe Sociale d'Origine</h2>
+                    <div class="class-grid" id="class-selection-grid">
+                        <!-- Généré dynamiquement en JS -->
+                    </div>
+
+                    <div class="name-input-group">
+                        <input type="text" id="hero-name-input" class="hero-name-input" placeholder="Entrez votre nom ou pseudonyme..." value="Gilgamesh" maxlength="24">
+                        <button class="btn-primary-start" onclick="window.gameEngine.startGame()">Commencer l'Aventure ➔</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ÉCRAN DE JEU & VISUAL NOVEL -->
+            <section class="story-screen" id="story-screen" style="display: none;">
+                
+                <!-- FENÊTRE DE SCÈNE VISUELLE -->
+                <div class="scene-viewport" id="scene-viewport" data-mood="neutral">
+                    <div class="scene-overlay-gradient"></div>
+                    
+                    <div class="scene-banner">
+                        <div class="chapter-tag" id="scene-chapter-tag">Chapitre I</div>
+                        <div class="location-title" id="scene-location-title">Les Berges du Tigre et de l'Euphrate</div>
+                    </div>
+
+                    <div class="scene-characters" id="scene-characters">
+                        <div class="character-sprite-wrapper" id="scene-character-wrapper">
+                            <img class="character-sprite" id="scene-character-sprite" src="" alt="Personnage en scène">
+                        </div>
+                    </div>
+
+                    <div class="key-concept-badge" onclick="window.codexManager.openModal()" title="Ouvrir le Codex">
+                        <span>💡</span>
+                        <span>Consulter le Codex pour cette notion</span>
+                    </div>
+                </div>
+
+                <!-- BOÎTE DE DIALOGUE & NARRATION -->
+                <div class="dialogue-container" id="dialogue-container">
+                    <div class="speaker-header">
+                        <div class="speaker-identity">
+                            <div class="speaker-avatar-frame" id="speaker-avatar-frame">
+                                <img id="speaker-avatar-img" src="" alt="Avatar">
+                                <div class="speaker-active-dot" id="speaker-active-dot" title="Parle actuellement">●</div>
+                            </div>
+                            <div class="speaker-text-meta">
+                                <span class="speaker-name" id="dialogue-speaker-name">Enki l'Ancien</span>
+                                <span class="speaker-role" id="dialogue-speaker-role">Doyen de la Cité</span>
+                            </div>
+                        </div>
+                        <div class="dialogue-header-controls">
+                            <button class="dialogue-rewind-btn" id="btn-dialogue-rewind" onclick="window.gameEngine.rewindDialogue()" title="Relire le dialogue précédent">
+                                <span>↩</span>
+                                <span>Relire</span>
+                            </button>
+                            <button class="text-speed-btn" id="btn-text-speed" onclick="window.gameEngine.cycleTextSpeed()" title="Changer la vitesse de défilement du texte">
+                                <span class="speed-icon">⚡</span>
+                                <span id="speed-label">Normal</span>
+                            </button>
+                            <div class="text-size-controls" title="Ajuster la taille du texte">
+                                <span class="text-size-label">Taille :</span>
+                                <button class="text-size-btn" data-size="sm" onclick="window.gameEngine.setTextSize('sm')" title="Taille standard">A-</button>
+                                <button class="text-size-btn active" data-size="md" onclick="window.gameEngine.setTextSize('md')" title="Taille grande (optimale)">A</button>
+                                <button class="text-size-btn" data-size="lg" onclick="window.gameEngine.setTextSize('lg')" title="Taille très grande">A+</button>
+                                <button class="text-size-btn" data-size="xl" onclick="window.gameEngine.setTextSize('xl')" title="Taille maximale (Confort visuel)">A++</button>
+                            </div>
+                            <button class="font-toggle-btn" id="btn-font-toggle" onclick="window.gameEngine.toggleComfortFont()" title="Basculer vers police de lecture facilitée (Dyslexie/Confort)">
+                                <span>👓</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- LIGNE DE RÉACTION DU HÉROS (OPTIONNELLE) -->
+                    <div class="hero-reaction-banner" id="hero-reaction-banner" style="display: none;">
+                        <span class="hero-reaction-icon">💭</span>
+                        <span class="hero-reaction-text" id="hero-reaction-text"></span>
+                    </div>
+
+                    <div class="dialogue-text" id="dialogue-text-body">
+                        <!-- Texte chargé dynamiquement -->
+                    </div>
+
+                    <div class="dialogue-skip-hint" id="dialogue-skip-hint" style="display: none;">
+                        <span>Cliquer ou [Espace] pour tout afficher • Touches [1] [2] [3] [4] pour choisir</span>
+                        <span class="skip-key-icon">⏎</span>
+                    </div>
+
+                    <div class="choices-container" id="dialogue-choices-container">
+                        <!-- Boutons de choix générés dynamiquement -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ÉCRAN DE BILAN FINAL & DIPLÔME PÉDAGOGIQUE -->
+            <section class="endgame-screen" id="endgame-screen" style="display: none;">
+                <div class="diploma-card">
+                    <div style="font-size: 3rem; margin-bottom: 8px;">🏛️📜🔺</div>
+                    <h2 class="diploma-title">Grand Certificat d'Histoire Antique</h2>
+                    <div style="font-size: 1.05rem; letter-spacing: 1px; color: #5c432d; text-transform: uppercase;">
+                        Ministère de l'Éducation • Histoire de 1re Secondaire
+                    </div>
+
+                    <div class="diploma-hero-name" id="diploma-hero-name">Gilgamesh</div>
+                    <div class="diploma-rank-title" id="diploma-rank-title">Grand Vizir de la Connaissance & Maître des Siècles</div>
+
+                    <div id="diploma-stats-summary" style="margin: 15px 0; font-size: 1.1rem;"></div>
+
+                    <!-- RADAR CHART CANVAS DE PERFORMANCE -->
+                    <div class="radar-chart-section" id="radar-chart-section">
+                        <h4 style="font-family: var(--font-title); color: #5c432d; margin-bottom: 8px;">
+                            📊 Profil de Compétences Historiques
+                        </h4>
+                        <canvas id="diploma-radar-canvas" width="340" height="280"></canvas>
+                    </div>
+
+                    <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 15px;">
+                        A franchi avec succès les cinq grandes époques de l'émergence des civilisations en Mésopotamie et en Égypte antique, en démontrant une maîtrise exemplaire des notions du <strong>Module 3</strong> :
+                    </p>
+
+                    <div class="mastery-grid">
+                        <div class="mastery-item"><span class="mastery-check">✓</span> 6 points communs des civilisations fluviales</div>
+                        <div class="mastery-item"><span class="mastery-check">✓</span> Évolution : Calculi ➔ Pictogrammes ➔ Cunéiforme</div>
+                        <div class="mastery-item"><span class="mastery-check">✓</span> Cités-États autonomes (Ur, Babylone, Lagash)</div>
+                        <div class="mastery-item"><span class="mastery-check">✓</span> Stèle du Code d'Hammourabi & égalité des lois</div>
+                        <div class="mastery-item"><span class="mastery-check">✓</span> Hiérarchie sociale en 5 niveaux stricts</div>
+                        <div class="mastery-item"><span class="mastery-check">✓</span> Crues fertiles du Nil, Pyramides & rôle du Pharaon</div>
+                        <div class="mastery-item"><span class="mastery-check">✓</span> Commerce de troc : exportations vs importations</div>
+                        <div class="mastery-item"><span class="mastery-check">✓</span> Révolution de l'alphabet phénicien (1200 av. J.-C.)</div>
+                    </div>
+
+                    <div style="font-style: italic; font-size: 0.9rem; color: #5c432d; margin-top: 15px;">
+                        « Gravé dans l'argile et la pierre pour la mémoire éternelle des hommes. »
+                    </div>
+                </div>
+
+                <div class="endgame-actions">
+                    <button class="btn-primary-start" onclick="window.print()">🖨️ Imprimer mon Diplôme</button>
+                    <button class="hud-btn" onclick="window.gameEngine.restart()">🔄 Rejouer avec une autre Classe</button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODALE DU CODEX HISTORIQUE -->
+    <div class="codex-modal" id="codex-modal" style="display: none;">
+        <div class="codex-content-wrapper">
+            <button class="codex-close-btn" id="btn-close-codex" title="Fermer">✕</button>
+            <div class="codex-sidebar">
+                <div class="codex-tabs-header">
+                    <button class="codex-tab-btn active" id="tab-codex-lessons" onclick="window.codexManager.setTab('lessons')">📜 Notions de Cours</button>
+                    <button class="codex-tab-btn" id="tab-codex-syntheses" onclick="window.codexManager.setTab('syntheses')">⭐ Fiches Synthèses</button>
+                </div>
+                <div class="codex-sidebar-list" id="codex-sidebar-list">
+                    <!-- Sommaire du codex généré en JS -->
+                </div>
+            </div>
+            <div class="codex-body">
+                <h3 class="codex-entry-title" id="codex-entry-title">Titre du Savoir</h3>
+                <div class="codex-entry-content" id="codex-entry-body">
+                    <!-- Contenu de la fiche -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE DES MÉDAILLES / SUCCÈS -->
+    <div class="medals-modal" id="medals-modal" style="display: none;">
+        <div class="medals-content-wrapper">
+            <button class="codex-close-btn" id="btn-close-medals" onclick="window.gameEngine.closeMedalsModal()" title="Fermer">✕</button>
+            <div class="medals-header">
+                <h3 style="font-family: var(--font-title); color: var(--gold-light); font-size: 1.4rem;">
+                    🏆 Tableau d'Honneur & Médailles Historiques
+                </h3>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Débloquez des distinctions royales en prenant des décisions éclairées et en réussissant vos défis !
+                </span>
+            </div>
+            <div class="medals-grid" id="medals-grid">
+                <!-- Généré dynamiquement en JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE DU PANNEAU AUDIO DÉTAILLÉ -->
+    <div class="audio-modal" id="audio-settings-modal" style="display: none;">
+        <div class="audio-modal-content">
+            <button class="codex-close-btn" id="btn-close-audio" onclick="window.gameEngine.closeAudioModal()" title="Fermer">✕</button>
+            <h3 style="font-family: var(--font-title); color: var(--gold-light); margin-bottom: 15px;">
+                🎵 Réglages Sonores & Ambiance
+            </h3>
+            <div class="audio-control-row">
+                <label for="vol-music">
+                    <span>🎶 Musique d'Ambiance Antique :</span>
+                    <span id="vol-music-val">40%</span>
+                </label>
+                <input type="range" id="vol-music" min="0" max="1" step="0.05" value="0.4" oninput="window.soundEngine.setMusicVolume(this.value)">
+            </div>
+            <div class="audio-control-row">
+                <label for="vol-sfx">
+                    <span>🔔 Bruitages & Effets (SFX) :</span>
+                    <span id="vol-sfx-val">70%</span>
+                </label>
+                <input type="range" id="vol-sfx" min="0" max="1" step="0.05" value="0.7" oninput="window.soundEngine.setSfxVolume(this.value)">
+            </div>
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <button class="hud-btn" id="btn-audio-mute-all" onclick="window.gameEngine.toggleMuteFromModal()">
+                    <span id="modal-mute-text">🔇 Couper tout le son</span>
+                </button>
+                <button class="btn-primary-start" style="padding: 6px 18px; font-size: 0.9rem;" onclick="window.gameEngine.closeAudioModal()">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFOBULLE / POPUP GLOSSAIRE DYNAMIQUE -->
+    <div class="glossary-bubble" id="glossary-bubble" style="display: none;">
+        <div class="glossary-bubble-header">
+            <span class="glossary-bubble-term" id="glossary-bubble-term">Terme</span>
+            <button class="glossary-bubble-close" onclick="window.codexManager.closeGlossaryBubble()">✕</button>
+        </div>
+        <div class="glossary-bubble-def" id="glossary-bubble-def">Définition rapide</div>
+        <button class="glossary-bubble-link" id="glossary-bubble-link">Voir dans le Codex ➔</button>
+    </div>
+
+    <!-- OVERLAY DES MINI-JEUX & PUZZLES -->
+    <div class="minigame-overlay" id="minigame-overlay" style="display: none;">
+        <div class="minigame-modal" id="minigame-content">
+            <!-- Injecté dynamiquement selon l'épreuve -->
+        </div>
+    </div>
+
+    <!-- OVERLAY DU GRAND EXAMEN SOMMATIF -->
+    <div class="exam-overlay" id="exam-overlay" style="display: none;">
+        <div class="exam-modal" id="exam-content">
+            <!-- Injecté dynamiquement selon l'épreuve -->
+        </div>
+    </div>
+
+    <!-- SCRIPTS DU JEU -->
+    <script src="js/audio.js"></script>
+    <script src="js/codex.js"></script>
+    <script src="js/minigames.js"></script>
+    <script src="js/story_data.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

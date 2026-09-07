@@ -1,0 +1,209 @@
+/* ==========================================================================
+   FEUILLE DE STYLE RESPONSIVE (Tablettes scolaires, Chromebooks & Mobiles)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    .game-hud {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+    
+    .hud-left, .hud-gauges, .hud-actions {
+        width: 100%;
+        justify-content: space-around;
+    }
+    
+    .scene-viewport {
+        height: 290px;
+    }
+
+    .character-sprite {
+        max-height: 270px;
+    }
+    
+    .class-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .writing-stages-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stele-container {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 15px;
+    }
+    
+    .game-title {
+        font-size: 2rem;
+    }
+    
+    .game-subtitle {
+        font-size: 1rem;
+        letter-spacing: 1.5px;
+    }
+    
+    .class-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .scene-viewport {
+        height: 240px;
+    }
+    
+    .character-sprite {
+        max-height: 220px;
+    }
+
+    .speaker-avatar-frame {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .dialogue-container {
+        padding: 16px 18px;
+    }
+    
+    .speaker-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .dialogue-header-controls {
+        align-self: flex-end;
+    }
+
+    .text-size-controls {
+        align-self: flex-end;
+    }
+    
+    .dialogue-text {
+        font-size: 1.05rem;
+    }
+    
+    .choice-btn {
+        padding: 12px 14px;
+        font-size: 1rem;
+    }
+    
+    .codex-content-wrapper {
+        flex-direction: column;
+        height: 92vh;
+    }
+    
+    .codex-sidebar {
+        width: 100%;
+        max-height: 160px;
+        border-right: none;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    
+    .codex-body {
+        padding: 18px;
+    }
+    
+    .mastery-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .diploma-card {
+        padding: 24px 16px;
+    }
+    
+    .diploma-title {
+        font-size: 1.6rem;
+    }
+    
+    .diploma-hero-name {
+        font-size: 1.5rem;
+    }
+    
+    .hud-gauges {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .gauge-bar-bg {
+        width: 75px;
+    }
+
+    .stele-container, .scale-visual-system {
+        grid-template-columns: 1fr;
+    }
+
+    .ziggurat-tier.tier-1 { width: 60%; }
+    .ziggurat-tier.tier-2 { width: 70%; }
+    .ziggurat-tier.tier-3 { width: 80%; }
+    .ziggurat-tier.tier-4 { width: 90%; }
+    .ziggurat-tier.tier-5 { width: 100%; }
+
+    .synthesis-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   OPTIMISATION SPÉCIFIQUE MACBOOK AIR 13" (1280x800 & 1440x900)
+   ========================================================================== */
+@media screen and (min-width: 1025px) and (max-height: 860px) {
+    #game-app {
+        padding: 8px 16px;
+    }
+
+    .game-hud {
+        padding: 8px 16px;
+        margin-bottom: 10px;
+    }
+
+    .scene-viewport {
+        height: clamp(240px, 32vh, 320px);
+    }
+
+    .character-sprite {
+        max-height: clamp(220px, 30vh, 300px);
+    }
+
+    .dialogue-container {
+        padding: 14px 20px;
+    }
+
+    .dialogue-text {
+        min-height: 60px;
+        margin-bottom: 12px;
+    }
+
+    .choices-grid {
+        gap: 8px;
+    }
+
+    .choice-btn {
+        padding: 10px 16px;
+    }
+
+    .codex-content-wrapper {
+        height: 82vh;
+    }
+}
+
+@media screen and (max-height: 720px) {
+    .scene-viewport {
+        height: 220px;
+    }
+
+    .character-sprite {
+        max-height: 200px;
+    }
+
+    .game-hud {
+        padding: 6px 12px;
+    }
+}
+
