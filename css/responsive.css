@@ -57,6 +57,21 @@
         height: 240px;
     }
     
+    .scene-banner {
+        top: 8px;
+        left: 10px;
+    }
+
+    .scene-cartouche {
+        padding: 5px 10px 6px 9px;
+        max-width: calc(100% - 20px);
+    }
+
+    .location-title {
+        font-size: 0.92rem;
+        max-width: 250px;
+    }
+    
     .character-sprite {
         max-height: 220px;
     }
@@ -206,4 +221,91 @@
         padding: 6px 12px;
     }
 }
+
+/* ==========================================================================
+   ADAPTATIONS RESPONSIVE : MENU PRINCIPAL, DISQUETTE & MODALES
+   ========================================================================== */
+@media (max-width: 768px) {
+    .main-menu-card {
+        padding: 24px 18px;
+    }
+
+    .main-title-glow {
+        font-size: 1.8rem;
+    }
+
+    .author-glow-text {
+        font-size: 0.88rem;
+        letter-spacing: 0.5px;
+    }
+
+    .author-credits-badge {
+        padding: 6px 14px;
+        gap: 6px;
+    }
+
+    .version-title-text {
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+    }
+
+    .hud-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .hud-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .load-modal-card, .tutorial-modal-card {
+        padding: 20px 16px;
+        max-height: 92vh;
+    }
+
+    .keys-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tutorial-gauges-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tutorial-illus-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Empilement des toasts sur mobile / petits écrans */
+    .toast-stack-container {
+        bottom: 12px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-width: none;
+        gap: 8px;
+    }
+
+    .butterfly-toast {
+        padding: 12px 28px 12px 14px;
+        border-radius: 10px;
+    }
+
+    .butterfly-toast-icon {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hud-btn-text {
+        display: none;
+    }
+
+    .hud-btn {
+        padding: 8px 10px;
+        font-size: 1rem;
+    }
+}
+
 

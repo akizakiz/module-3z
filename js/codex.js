@@ -233,6 +233,107 @@ const CODEX_GLOSSARY = {
     }
 };
 
+/**
+ * Gestionnaire d'empilement vertical des notifications popup (Toasts)
+ * Évite les superpositions, les masquages intempestifs et gère les minuteurs de manière indépendante.
+ */
+class ToastManager {
+    constructor() {
+        this.container = null;
+        this.maxVisible = 4;
+    }
+
+    getContainer() {
+        if (!this.container || !document.body.contains(this.container)) {
+            this.container = document.getElementById("toast-stack-container");
+            if (!this.container) {
+                this.container = document.createElement("div");
+                this.container.id = "toast-stack-container";
+                this.container.className = "toast-stack-container";
+                this.container.setAttribute("aria-live", "polite");
+                document.body.appendChild(this.container);
+            }
+        }
+        return this.container;
+    }
+
+    show({ className = "", icon = "📜", title = "", message = "", extraHtml = "", duration = 5500 }) {
+        const container = this.getContainer();
+
+        // Si le conteneur a atteint la limite, retirer le plus ancien proprement
+        while (container.children.length >= this.maxVisible) {
+            this.dismiss(container.firstChild);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `butterfly-toast ${className}`.trim();
+        toast.setAttribute("role", "alert");
+
+        toast.innerHTML = `
+            <button class="toast-close-btn" aria-label="Fermer la notification" title="Fermer">&times;</button>
+            <div class="butterfly-toast-icon">${icon}</div>
+            <div class="butterfly-toast-content">
+                <strong>${title}</strong>
+                <p>${message}</p>
+                ${extraHtml ? extraHtml : ""}
+            </div>
+        `;
+
+        // Événements de fermeture par clic
+        const closeBtn = toast.querySelector(".toast-close-btn");
+        if (closeBtn) {
+            closeBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.dismiss(toast);
+            };
+        }
+        toast.onclick = () => this.dismiss(toast);
+
+        // Insertion dans le conteneur
+        container.appendChild(toast);
+
+        // Animation d'apparition
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                toast.classList.add("visible");
+            });
+        });
+
+        // Minuteur de disparition indépendant par toast
+        let timer = setTimeout(() => {
+            this.dismiss(toast);
+        }, duration);
+
+        // Pause du minuteur au survol
+        toast.onmouseenter = () => {
+            clearTimeout(timer);
+        };
+        toast.onmouseleave = () => {
+            timer = setTimeout(() => {
+                this.dismiss(toast);
+            }, 2500);
+        };
+
+        return toast;
+    }
+
+    dismiss(toast) {
+        if (!toast || toast.classList.contains("hiding")) return;
+        toast.classList.add("hiding");
+        toast.classList.remove("visible");
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 450);
+    }
+}
+
+if (!window.toastManager) {
+    window.toastManager = new ToastManager();
+}
+
 class CodexManager {
     constructor() {
         this.entries = CODEX_DATA;
@@ -274,28 +375,18 @@ class CodexManager {
     }
 
     showUnlockToast(title) {
-        let toast = document.getElementById("codex-toast");
-        if (!toast) {
-            toast = document.createElement("div");
-            toast.id = "codex-toast";
-            toast.className = "butterfly-toast codex-toast";
-            document.body.appendChild(toast);
-        }
-
-        toast.innerHTML = `
-            <div class="butterfly-toast-icon">📜</div>
-            <div class="butterfly-toast-content">
-                <strong>Nouveau Savoir Déverrouillé !</strong>
-                <p>${title}</p>
-                <span style="font-size:0.75rem; color:#f7e089;">Consultez le Codex pour approfondir.</span>
-            </div>
-        `;
-        toast.classList.add("visible");
         if (window.soundEngine) window.soundEngine.playPapyrus();
 
-        setTimeout(() => {
-            toast.classList.remove("visible");
-        }, 5500);
+        if (window.toastManager) {
+            return window.toastManager.show({
+                className: "codex-toast",
+                icon: "📜",
+                title: "Nouveau Savoir Déverrouillé !",
+                message: title,
+                extraHtml: '<span style="font-size:0.75rem; color:#f7e089; display:block; margin-top:2px;">Consultez le Codex pour approfondir.</span>',
+                duration: 5500
+            });
+        }
     }
 
     setTab(tab) {

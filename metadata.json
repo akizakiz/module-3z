@@ -1,0 +1,6 @@
+{
+  "name": "Les Chroniques du Croissant Fertile",
+  "description": "Aventure historique interactive sur l'émergence de la civilisation mésopotamienne et les premières cités-États.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

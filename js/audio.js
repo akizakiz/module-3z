@@ -541,6 +541,82 @@ class AncientSoundEngine {
         noise.start(now);
     }
 
+    /** Son de roulement du sceau-cylindre sur l'argile fraîche */
+    playSealRoll() {
+        this.init(); this.resume();
+        if (this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.4);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.35;
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(450, now);
+        filter.frequency.linearRampToValueAtTime(300, now + 0.35);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.linearRampToValueAtTime(0.3, now + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.sfxGain);
+
+        noise.start(now);
+    }
+
+    /** Son de carillon minéral / résonance pure du lapis-lazuli */
+    playGemChime() {
+        this.init(); this.resume();
+        if (this.isMuted) return;
+        const now = this.ctx.currentTime;
+        [1046.5, 1318.5, 1567.98].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+
+            gain.gain.setValueAtTime(0.18, now + idx * 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.6);
+
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+
+            osc.start(now + idx * 0.05);
+            osc.stop(now + idx * 0.05 + 0.65);
+        });
+    }
+
+    /** Son de grincement doux de fléau de balance en bois et bronze */
+    playBalanceTilt() {
+        this.init(); this.resume();
+        if (this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+
+        osc.start(now);
+        osc.stop(now + 0.15);
+    }
+
     /** Son des flots du Nil et canaux d'irrigation */
     playWater() {
         this.init(); this.resume();
@@ -680,6 +756,69 @@ class AncientSoundEngine {
                 });
             }, chord.delay);
         });
+    }
+
+    /** AXE 3 : Accord percussif dramatique (corde tendue frappée dans les graves) pour coup de théâtre */
+    playTensionChord() {
+        this.init(); this.resume();
+        if (this.isMuted) return;
+        const now = this.ctx.currentTime;
+        // Percussion sourde sur peau de tambour
+        const drumOsc = this.ctx.createOscillator();
+        const drumGain = this.ctx.createGain();
+        drumOsc.type = 'sine';
+        drumOsc.frequency.setValueAtTime(120, now);
+        drumOsc.frequency.exponentialRampToValueAtTime(38, now + 0.45);
+        drumGain.gain.setValueAtTime(0.4, now);
+        drumGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        drumOsc.connect(drumGain);
+        drumGain.connect(this.sfxGain);
+        drumOsc.start(now);
+        drumOsc.stop(now + 0.45);
+
+        // Accord de tension percussif (corde tendue frappée dans les graves avec résonance sombre)
+        const notes = [73.42, 110.00, 155.56]; // Ré2, La2, Mi bémol 3 (triton dramatique)
+        notes.forEach(f => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, now);
+            osc.frequency.exponentialRampToValueAtTime(f * 0.98, now + 0.6);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(650, now);
+
+            gain.gain.setValueAtTime(0.22, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.sfxGain);
+
+            osc.start(now);
+            osc.stop(now + 0.65);
+        });
+    }
+
+    /** AXE 3 : Flots du fleuve accentués d'une basse sourde pour simuler le grondement / la crue */
+    playFloodRumble() {
+        this.init(); this.resume();
+        if (this.isMuted) return;
+        this.playWater();
+        const now = this.ctx.currentTime;
+        // Grondement de basse sourde
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(58, now);
+        osc.frequency.linearRampToValueAtTime(36, now + 0.85);
+        gain.gain.setValueAtTime(0.38, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start(now);
+        osc.stop(now + 0.85);
     }
 }
 

@@ -74,12 +74,13 @@ const STORY_DATA = {
             character: "Maître Arad-Nanna",
             characterRole: "Chef Archiviste du Palais",
             conceptUnlocked: "evolution_ecriture",
+            shake: "light",
+            sound: "clay",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*La porte en cèdre massif claque lourdement. L'odeur d'argile fraîche et d'encens emplit la pénombre.*</em></p>
-                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Regarde cette bourse d'argile scellée... Elle arrive du temple d'Ur et doit contenir les <strong>calculis</strong> attestant de <strong>500 sacs d'orge</strong> pour la cité ! »</p>
-                    <p class="vn-speech-action"><em>*Le vieux scribe approche la torche de la bulle d'argile. Ses mains tremblent.*</em></p>
-                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Quelqu'un a altéré le sceau officiel avant la cuisson de l'argile ! Si les réserves de céréales sont pillées, la famine déclenchera une guerre entre nos <strong>cités-États</strong>. Tu es mon meilleur apprenti : prouve la fraude avant que les traîtres ne reviennent ! »</p>
+                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Regarde cette bourse d'argile. Vite ! Elle devait garantir <strong class="vn-concept-highlight">500 sacs d'orge</strong> pour la cité d'Ur. »</p>
+                    <p class="vn-speech-action"><em>*Le vieux scribe gratte le sceau brisé d'une main fébrile.*</em></p>
+                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Le sceau a été falsifié à chaud pour dissimuler le vol des <strong class="vn-concept-highlight" data-glossary="calculis">calculis</strong> ! Si le grenier royal est vidé, notre <strong class="vn-concept-highlight" data-glossary="cite_etat">cité-État</strong> mourra de faim. C'est à toi d'agir, {HERO_ORIGIN_CALL} : {HERO_PAST}, démasque le faussaire ! »</p>
                 </div>
             `,
             choices: [
@@ -88,6 +89,7 @@ const STORY_DATA = {
                     impact: { savoir: +10, influence: +5 },
                     impactTag: "+10 Savoir, +5 Influence • Analyse matérielle",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { found_fake_calculi: true },
                     addClue: "Bourse de calculis truquée (Preuve de détournement de blé)",
                     butterflyEffect: "Cette preuve matérielle sera décisive lors du grand procès royal.",
@@ -98,6 +100,7 @@ const STORY_DATA = {
                     impact: { savoir: +12, destin: +8 },
                     impactTag: "+12 Savoir, +8 Destin • Message d'alerte",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { alerted_guards_early: true },
                     butterflyEffect: "Les sentinelles surveilleront les greniers royaux dès cette nuit.",
                     nextNode: "ch1_scribe_puzzle_intro"
@@ -107,6 +110,7 @@ const STORY_DATA = {
                     impact: { savoir: +8, influence: +12 },
                     impactTag: "+8 Savoir, +12 Influence • Enquête au Palais",
                     sound: "choice",
+                    shake: "light",
                     setFlags: { identified_corrupt_seal: true },
                     addClue: "Empreinte du Sceau du Conseiller Lu-Enlil",
                     butterflyEffect: "Vous démasquez un traître haut placé au sein des nobles.",
@@ -124,10 +128,13 @@ const STORY_DATA = {
             character: "Maître Arad-Nanna",
             characterRole: "Chef Archiviste",
             conceptUnlocked: "points_communs",
+            sound: "clay",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Bien joué ! Mais pour consigner cette trahison de manière infalsifiable devant les juges de la cité, tu dois maîtriser parfaitement les étapes de notre écriture ! »</p>
-                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Du simple <strong>calculi</strong> d'argile servant à compter jusqu'à notre écriture <strong>cunéiforme</strong> en forme de clous, et au futur <strong>alphabet</strong> des Phéniciens... Reconstitue la fresque de l'histoire humaine ! »</p>
+                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Rapide et précis, {HERO_NAME} ! Mais les juges exigent un témoignage infalsifiable. Seul un vrai <strong class="vn-concept-highlight" data-glossary="scribe">scribe</strong> peut consigner la vérité ! »</p>
+                    <p class="vn-speech-action"><em>*Il te tend un calame en roseau taillé et une tablette d'argile fraîche.*</em></p>
+                    <p class="vn-speaker"><strong>Maître Arad-Nanna :</strong> « Du simple jeton d'argile (<strong class="vn-concept-highlight" data-glossary="calculis">calculi</strong>) jusqu'à l'écriture <strong class="vn-concept-highlight" data-glossary="cuneiforme">cunéiforme</strong> et au futur <strong class="vn-concept-highlight" data-glossary="alphabet_phenicien">alphabet</strong> : reconstitue la fresque avant que l'argile ne sèche ! »</p>
                 </div>
             `,
             choices: [
@@ -152,12 +159,13 @@ const STORY_DATA = {
             character: "Sin-Iddinam",
             characterRole: "Batelier et Convoyeur Fluvial",
             conceptUnlocked: "points_communs",
+            sound: "coins",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Le clapotis des eaux du fleuve heurte les coques des barges marchandes chargées de poteries.*</em></p>
-                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> <em>(à voix basse)</em> « Psitt ! Cache-toi derrière ces jarres d'huile d'olive ! Regarde vers le ponton nord... »</p>
-                    <p class="vn-speech-action"><em>*Des silhouettes masquées transbordent des lingots métalliques sous des bâches de lin.*</em></p>
-                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> « Ils exportent clandestinement notre blé et nos poteries pour importer du bronze illégal sans payer les taxes au Roi ! Et ils utilisent de fausses bourses de <strong>calculis</strong> pour effacer les traces du troc. Ils préparent un soulèvement ! »</p>
+                    <p class="vn-speech-action"><em>*Des pas lourds résonnent sur le ponton. Sin-Iddinam te tire vivement derrière les barriques.*</em></p>
+                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> <em>(chuchotant)</em> « {HERO_ORIGIN_CALL}, baisse la tête ! {HERO_PAST}, tu reconnais cette manœuvre suspecte... Regarde vers la grande barge... »</p>
+                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> « Des contrebandiers chargent nos poteries pour voler du bronze sans payer les taxes au Roi ! Leurs registres de <strong class="vn-concept-highlight" data-glossary="calculis">calculis</strong> sont truqués. Tu as l'œil vif : on les prend de vitesse ? »</p>
                 </div>
             `,
             choices: [
@@ -166,6 +174,7 @@ const STORY_DATA = {
                     impact: { richesse: +10, destin: +10 },
                     impactTag: "+10 Richesse, +10 Destin • Infiltration risquée",
                     sound: "coins",
+                    shake: "light",
                     setFlags: { stole_contraband_bronze: true },
                     addClue: "Lingot de bronze clandestin frappé d'un lion noir",
                     butterflyEffect: "Cet échantillon prouvera la complicité de marchands étrangers.",
@@ -176,6 +185,7 @@ const STORY_DATA = {
                     impact: { influence: +10, richesse: +5 },
                     impactTag: "+10 Influence, +5 Richesse • Négociation",
                     sound: "choice",
+                    shake: "light",
                     setFlags: { recruited_barge_pilot: true },
                     butterflyEffect: "Le pilote de barge sera votre allié précieux lors de votre fuite future.",
                     nextNode: "ch1_artisan_puzzle_intro"
@@ -185,6 +195,7 @@ const STORY_DATA = {
                     impact: { savoir: +12, influence: +5 },
                     impactTag: "+12 Savoir, +5 Influence • Déduction marchande",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { mapped_smuggling_route: true },
                     addClue: "Carte des routes fluviales de contrebande",
                     butterflyEffect: "Vous anticipez les prochains mouvements de la flotte clandestine.",
@@ -202,10 +213,13 @@ const STORY_DATA = {
             character: "Sin-Iddinam",
             characterRole: "Batelier",
             conceptUnlocked: "evolution_ecriture",
+            sound: "clay",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> « Pour retracer leurs transactions frauduleuses, nous devons décoder leurs contrats ! L'écriture est née précisément pour enregistrer le <strong>commerce et le troc</strong>. »</p>
-                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> « Remets en ordre les étapes historiques, des boules de calculis d'argile jusqu'aux signes cunéiformes et à l'alphabet ! »</p>
+                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> « Joli coup d'œil, {HERO_NAME} ! Mais pour coincer ces voleurs, on doit décoder leurs registres secrets de <strong class="vn-concept-highlight" data-glossary="commerce_troc">troc</strong>. »</p>
+                    <p class="vn-speech-action"><em>*Il déplie un rouleau d'argile couvert d'empreintes de roseaux.*</em></p>
+                    <p class="vn-speaker"><strong>Sin-Iddinam :</strong> « L'écriture est née pour compter les marchandises ! Reclasse les étapes historiques, des billes d'argile jusqu'à l'alphabet phénicien, et leur combine s'écroule ! »</p>
                 </div>
             `,
             choices: [
@@ -230,12 +244,15 @@ const STORY_DATA = {
             character: "Capitaine Nergal",
             characterRole: "Commandant de la Garde Royale",
             conceptUnlocked: "points_communs",
+            sound: "chisel",
+            shake: "medium",
+            flash: true,
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Un cri de sentinelle déchire la nuit au sommet des murailles de briques séchées.*</em></p>
-                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> <em>(glaive au clair)</em> « Garde, aux armes ! Trois intrus ont forcé la poterne ouest ! Ils tentaient de dérober l'armurerie en bronze et les registres d'impôts du Roi ! »</p>
-                    <p class="vn-speech-action"><em>*Le capitaine pointe sa torche vers une silhouette qui s'enfuit dans les ruelles sombres.*</em></p>
-                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> « L'un des fuyards a laissé tomber une tablette d'argile fraîche portant un ordre d'attaque. Rattrape-les ou sécurise la porte de la cité ! »</p>
+                    <p class="vn-speech-action"><em>*Une flèche enflammée siffle au-dessus de ta tête et se fiche dans les créneaux !*</em></p>
+                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> « {HERO_ORIGIN_CALL} ! Debout, {HERO_PAST} ! L'ennemi force la poterne ouest pour piller nos réserves de bronze et les ordres du Roi ! »</p>
+                    <p class="vn-speech-action"><em>*Le capitaine abat son glaive sur la chaîne d'une herse dans un fracas métallique.*</em></p>
+                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> « Un fuyard vient de lâcher cette tablette codée. Bloque la porte ou pourchasse-les dans les ruelles : pas le temps d'hésiter ! »</p>
                 </div>
             `,
             choices: [
@@ -244,6 +261,7 @@ const STORY_DATA = {
                     impact: { influence: +12, destin: +10 },
                     impactTag: "+12 Influence, +10 Destin • Poursuite héroïque",
                     sound: "chisel",
+                    shake: "medium",
                     setFlags: { captured_live_saboteur: true },
                     addClue: "Aveu arraché à un saboteur blessé",
                     butterflyEffect: "Le suspect capturé témoignera contre ses chefs au tribunal royal.",
@@ -254,6 +272,7 @@ const STORY_DATA = {
                     impact: { savoir: +10, influence: +8 },
                     impactTag: "+10 Savoir, +8 Influence • Vigilance tactique",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { secured_armory: true },
                     addClue: "Tablette d'argile codée trouvée sur le saboteur",
                     butterflyEffect: "Les armes métalliques de Babylone sont en sécurité absolue.",
@@ -264,6 +283,7 @@ const STORY_DATA = {
                     impact: { savoir: +12, destin: +12 },
                     impactTag: "+12 Savoir, +12 Destin • Enquête secrète",
                     sound: "choice",
+                    shake: "light",
                     setFlags: { spared_saboteur_informant: true },
                     butterflyEffect: "🦋 Effet Papillon : Cet informateur vous revaudra la vie et interviendra plus tard !",
                     nextNode: "ch1_soldat_puzzle_intro"
@@ -280,10 +300,13 @@ const STORY_DATA = {
             character: "Capitaine Nergal",
             characterRole: "Commandant de la Garde",
             conceptUnlocked: "evolution_ecriture",
+            sound: "clay",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> « Les conspirateurs utilisent des écritures anciennes pour masquer leurs ordres de guerre. »</p>
-                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> « Pour déchiffrer leur plan d'attaque contre nos <strong>cités-États</strong>, nous devons maîtriser l'évolution historique des signes : des calculis d'argile au cunéiforme ! »</p>
+                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> « Bien combattu, {HERO_NAME} ! Mais ces traîtres ont codé leur itinéraire d'attaque dans une écriture archaïque. »</p>
+                    <p class="vn-speech-action"><em>*Nergal essuie la sueur de son front avec son brassard de cuir.*</em></p>
+                    <p class="vn-speaker"><strong>Capitaine Nergal :</strong> « Pour sauver notre <strong class="vn-concept-highlight" data-glossary="cite_etat">cité-État</strong>, il faut comprendre l'évolution des signes, des premiers <strong class="vn-concept-highlight" data-glossary="calculis">calculis</strong> au <strong class="vn-concept-highlight" data-glossary="cuneiforme">cunéiforme</strong>. Décode-moi ça, et vite ! »</p>
                 </div>
             `,
             choices: [
@@ -308,12 +331,15 @@ const STORY_DATA = {
             character: "Ur-Zababa",
             characterRole: "Maître Ouvrier des Travaux Hydrauliques",
             conceptUnlocked: "points_communs",
+            sound: "flood",
+            shake: "heavy",
+            flash: true,
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Les eaux boueuses de l'Euphrate grondent avec fureur contre les batardeaux de roseaux.*</em></p>
-                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> <em>(désignant un pilier fendu)</em> « Regarde cette entaille ! Ce n'est pas la force du fleuve, c'est un coup de levier en bronze ! »</p>
-                    <p class="vn-speech-action"><em>*Une fissure s'élargit le long de la vanne maîtresse d'irrigation.*</em></p>
-                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> « Si la digue cède cette nuit, les crues détruiront toutes les récoltes de blé et la cité sera condamnée à la famine ! Les coupables ont fui en laissant tomber un plan d'architecture hydraulique et un stylet d'écriture ! »</p>
+                    <p class="vn-speech-action"><em>*Un grondement sourd fait trembler le sol. L'eau boueuse de l'Euphrate jaillit entre les poutres !*</em></p>
+                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> « {HERO_ORIGIN_CALL}, l'eau monte ! Toi, {HERO_PAST}, tu vois bien que cette fissure n'est pas un accident : un traître a saboté la <strong class="vn-concept-highlight" data-glossary="irrigation">digue</strong> au levier de bronze ! »</p>
+                    <p class="vn-speech-action"><em>*Un pan de briques s'effondre avec fracas dans le courant tumultueux.*</em></p>
+                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> « Si la vanne cède sous nos pieds, tout le quartier et les récoltes sont engloutis ! Colmate la brèche ou intercepte les fuyards, c'est une question de survie ! »</p>
                 </div>
             `,
             choices: [
@@ -322,6 +348,7 @@ const STORY_DATA = {
                     impact: { destin: +15, savoir: +5 },
                     impactTag: "+15 Destin, +5 Savoir • Sauvetage d'urgence",
                     sound: "water",
+                    shake: "medium",
                     setFlags: { saved_dam_in_extremis: true },
                     butterflyEffect: "Les champs de blé sont sauvés ; les paysans vous acclament en héros.",
                     nextNode: "ch1_batisseur_puzzle_intro"
@@ -331,6 +358,7 @@ const STORY_DATA = {
                     impact: { savoir: +12, influence: +8 },
                     impactTag: "+12 Savoir, +8 Influence • Indice stratégique",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { found_hydraulic_sabotage_plan: true },
                     addClue: "Plan secret de sabotage des canaux d'irrigation",
                     butterflyEffect: "Ce plan dévoile le calendrier des sabotages prévus par les traîtres.",
@@ -341,6 +369,7 @@ const STORY_DATA = {
                     impact: { influence: +12, destin: +8 },
                     impactTag: "+12 Influence, +8 Destin • Piège d'ingénieur",
                     sound: "choice",
+                    shake: "light",
                     setFlags: { laid_hydraulic_trap: true },
                     butterflyEffect: "Vous prendrez les comploteurs par surprise au Chapitre II.",
                     nextNode: "ch1_batisseur_puzzle_intro"
@@ -357,10 +386,13 @@ const STORY_DATA = {
             character: "Ur-Zababa",
             characterRole: "Maître Ouvrier",
             conceptUnlocked: "evolution_ecriture",
+            sound: "clay",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> « Pour concevoir nos canaux d'irrigation et transmettre des plans précis sans erreurs, l'écriture a été notre plus grande invention technique ! »</p>
-                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> « Démontre ta maîtrise de l'histoire des signes pour déchiffrer les instructions des conjurés ! »</p>
+                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> « Tu as les nerfs solides, {HERO_NAME} ! On a évité le désastre, mais regarde le plan abandonné par le saboteur. »</p>
+                    <p class="vn-speech-action"><em>*Il époussète une tablette d'argile gravée de symboles techniques.*</em></p>
+                    <p class="vn-speaker"><strong>Ur-Zababa :</strong> « Pour construire nos canaux d'irrigation sans commettre d'erreur mortelle, nos ancêtres ont inventé l'écriture. Reconstitue la frise des signes pour percer leur plan d'attaque ! »</p>
                 </div>
             `,
             choices: [
@@ -384,11 +416,14 @@ const STORY_DATA = {
             character: "Le Sage Enki",
             characterRole: "Sage du Conseil des Cités",
             conceptUnlocked: "cite_etat",
+            sound: "tension",
+            shake: "light",
+            flash: true,
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Les clameurs s'élèvent sur la grande esplanade alors que le mystère s'épaissit.*</em></p>
-                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « Bravo ! Grâce à ta perspicacité, le premier voile est levé. Mais la conjuration est immense ! »</p>
-                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « Le complot s'étend à travers tout le Croissant Fertile : d'<strong>Ur</strong> à <strong>Lagash</strong>, jusqu'à la puissante <strong>Babylone</strong> ! Chacune de nos <strong>cités-États</strong> est autonome, gouvernée par son roi et ses lois écrites... Si elles entrent en guerre, notre civilisation s'effondrera ! Embarque sur le fleuve vers Babylone sans perdre une seconde ! »</p>
+                    <p class="vn-speech-action"><em>*Le vent du désert souffle sur l'esplanade. Le Sage Enki s'avance, le regard grave.*</em></p>
+                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « Splendide déduction, {HERO_ORIGIN_CALL} ! Toi, {HERO_PAST}, tu mesures la gravité de l'heure : le complot menace tout le <strong class="vn-concept-highlight" data-glossary="croissant_fertile">Croissant fertile</strong>. »</p>
+                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « D'Ur à Babylone, chaque <strong class="vn-concept-highlight" data-glossary="cite_etat">cité-État</strong> possède son roi, ses dieux et ses lois. Si elles s'entredéchirent, notre civilisation s'éteint. Prends la barre de la barge : en route pour Babylone ! »</p>
                 </div>
             `,
             choices: [
@@ -397,6 +432,7 @@ const STORY_DATA = {
                     impact: { savoir: +5, influence: +5, destin: +10 },
                     impactTag: "Départ vers le Chapitre II ➔",
                     sound: "water",
+                    shake: "light",
                     nextNode: "ch2_intro_hub"
                 }
             ]
@@ -414,11 +450,13 @@ const STORY_DATA = {
             character: "Gudea le Marchand",
             characterRole: "Émissaire de la Ligue Marchande",
             conceptUnlocked: "commerce_troc",
+            sound: "coins",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Une foule cosmopolite grouille sur les quais de Babylone. L'odeur des épices se mêle à celle de la poussière des caravanes.*</em></p>
-                    <p class="vn-speaker"><strong>Gudea :</strong> « Te voilà enfin ! Le cerveau de la conspiration se fait appeler <strong>"L'Ombre du Lion"</strong>. Il contrôle une flotte secrète et manipule les cours du troc. »</p>
-                    <p class="vn-speaker"><strong>Gudea :</strong> « Pour l'acculer, nous devons bloquer ses cargaisons ! Rappelle-toi : la Mésopotamie <strong>exporte</strong> ses surplus (blé, poteries, objets fabriqués) pour <strong>importer</strong> ce qui lui manque cruellement : les métaux, le bois précieux et les pierres ! »</p>
+                    <p class="vn-speech-action"><em>*La clameur du grand marché t'assaille : marchands ambulants, tintements de pesée et senteurs d'épices.*</em></p>
+                    <p class="vn-speaker"><strong>Gudea :</strong> « Te voilà enfin, {HERO_ORIGIN_CALL} ! {GUDEA_POSTURE_REMARK} Le cerveau du marché noir se fait appeler <strong>"L'Ombre du Lion"</strong> et manipule le cours des denrées ! »</p>
+                    <p class="vn-speaker"><strong>Gudea :</strong> « La Mésopotamie doit exporter son blé pour importer du bois et des métaux rares. Bloque son réseau de <strong class="vn-concept-highlight" data-glossary="commerce_troc">troc</strong> fluvial, et son empire secret s'écroule ! »</p>
                 </div>
             `,
             choices: [
@@ -441,12 +479,14 @@ const STORY_DATA = {
             character: "Gudea le Marchand",
             characterRole: "Émissaire",
             conceptUnlocked: "points_communs",
+            sound: "tension",
+            shake: "medium",
+            flash: true,
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Les forges de bronze crépitent. Les marchands clandestins, pris au piège par le blocus de leurs cargaisons, paniquent.*</em></p>
-                    <p class="vn-speaker"><strong>Gudea :</strong> « Nous en tenons un ! C'est le contrebandier en chef de l'Ombre du Lion ! »</p>
-                    <p class="vn-speech-action"><em>*L'homme est acculé contre le fourneau incandescent, son poignard tiré.*</em></p>
-                    <p class="vn-speaker"><strong>Contrebandier :</strong> « Vous n'empêcherez rien ! Les lois de vos rois ne valent rien face aux Dieux ! Même le grand prêtre au sommet de la Ziggourat nous protège ! »</p>
+                    <p class="vn-speech-action"><em>*L'étau se resserre dans la ruelle des forgerons. Un homme armé d'un poignard recule contre le fourneau brûlant.*</em></p>
+                    <p class="vn-speaker"><strong>Contrebandier :</strong> <em>(paniqué)</em> « Reculez ! Vous croyez que vos lois nous font peur ? Même au sommet de la <strong class="vn-concept-highlight" data-glossary="ziggourat">Ziggourat</strong>, nos complices sont intouchables ! »</p>
+                    <p class="vn-speaker"><strong>Gudea :</strong> « Tu es coincé, misérable ! {HERO_NAME}, c'est le moment d'utiliser ton talent pour lui faire cracher toute la vérité ! »</p>
                 </div>
             `,
             choices: [
@@ -457,6 +497,7 @@ const STORY_DATA = {
                     impact: { savoir: +18, influence: +10 },
                     impactTag: "📜 SCRIBE • Falsification démasquée",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { scribe_unmasked_fake_contract: true },
                     addClue: "Contrat d'argile falsifié au nom du Temple d'Ur",
                     butterflyEffect: "Cette preuve accable directement les comploteurs cléricaux.",
@@ -469,6 +510,7 @@ const STORY_DATA = {
                     impact: { richesse: +10, savoir: +15 },
                     impactTag: "🏺 ARTISAN • Accord commercial clandestin",
                     sound: "coins",
+                    shake: "light",
                     setFlags: { artisan_bought_smuggler_secrets: true },
                     addClue: "Sceau de fonte illégale et liste des acheteurs",
                     butterflyEffect: "Le contrebandier devient votre espion au cœur de la Ziggourat.",
@@ -481,6 +523,7 @@ const STORY_DATA = {
                     impact: { influence: +18, destin: +10 },
                     impactTag: "🛡️ SOLDAT • Arrestation musclée",
                     sound: "chisel",
+                    shake: "medium",
                     setFlags: { soldat_subdued_suspect: true },
                     addClue: "Aveu complet du complot sous la garde royale",
                     butterflyEffect: "La garde royale prend le contrôle des accès à la Ziggourat.",
@@ -493,6 +536,7 @@ const STORY_DATA = {
                     impact: { destin: +18, savoir: +10 },
                     impactTag: "🌾 BÂTISSEUR • Piège hydraulique urbain",
                     sound: "water",
+                    shake: "medium",
                     setFlags: { batisseur_sewer_trap: true },
                     addClue: "Plan des conduits secrets menant au temple",
                     butterflyEffect: "Vous découvrez le passage dérobé vers le sommet de la Ziggourat.",
@@ -504,6 +548,7 @@ const STORY_DATA = {
                     impact: { savoir: +14, influence: +8 },
                     impactTag: "+14 Savoir, +8 Influence • Interrogatoire habile",
                     sound: "coins",
+                    shake: "light",
                     setFlags: { bribed_informant_truth: true },
                     addClue: "Liste des traîtres du Conseil Royal",
                     butterflyEffect: "🦋 Effet Papillon : Vous possédez la liste complète pour le procès royal !",
@@ -514,6 +559,7 @@ const STORY_DATA = {
                     impact: { savoir: +12, richesse: +8 },
                     impactTag: "+12 Savoir, +8 Richesse • Saisie de pièces",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { seized_conspirator_token: true },
                     addClue: "Sceau-cylindre en lapis-lazuli de l'Ombre du Lion",
                     butterflyEffect: "Ce sceau vous ouvrira les portes du sanctuaire de la Ziggourat.",
@@ -532,11 +578,13 @@ const STORY_DATA = {
             character: "Le Sage Enki",
             characterRole: "Doyen du Conseil",
             conceptUnlocked: "religion_ziggourat",
+            sound: "tension",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*La gigantesque pyramide à degrés — la Ziggourat — découpe sa masse imposante dans le ciel nocturne.*</em></p>
-                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « Regarde ces terrasses colossales... Ce temple relie le monde des mortels à la demeure des Dieux du Panthéon mésopotamien (Anu, Enlil, Ishtar). »</p>
-                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « Les conspirateurs se rassemblent au sommet ! Mais attention : en Mésopotamie, l'accès au temple obéit à une <strong>hiérarchie sociale stricte en 5 niveaux</strong>. Seul celui qui maîtrise cet ordre sacré pourra franchir les gardes sans commettre de sacrilège ! »</p>
+                    <p class="vn-speech-action"><em>*Sous la voûte étoilée, la gigantesque Ziggourat d'Ur dresse ses terrasses colossales de briques séchées.*</em></p>
+                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « {HERO_NAME}, lève les yeux. Ce sanctuaire relie les hommes aux dieux du ciel. Les conspirateurs s'y cachent ! »</p>
+                    <p class="vn-speaker"><strong>Le Sage Enki :</strong> « Mais nul ne pénètre ici sans respecter la stricte <strong class="vn-concept-highlight" data-glossary="hierarchie_sociale">hiérarchie sociale</strong> en 5 rangs. Prouve ta maîtrise des classes mésopotamiennes, ou les gardes te jetteront aux fers ! »</p>
                 </div>
             `,
             choices: [
@@ -545,6 +593,7 @@ const STORY_DATA = {
                     impact: { destin: +10, influence: +5 },
                     impactTag: "Accéder au Chapitre III ➔",
                     sound: "fanfare",
+                    shake: "light",
                     nextNode: "ch3_ziggurat_trial"
                 }
             ]
@@ -562,11 +611,13 @@ const STORY_DATA = {
             character: "Grande Prêtresse Enheduanna",
             characterRole: "Gardienne du Panthéon et Poétesse Royale",
             conceptUnlocked: "hierarchie_sociale",
+            sound: "tension",
+            shake: "medium",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Au sommet de la Ziggourat, des brasiers embrasent l'obscurité. La Grande Prêtresse se dresse avec majesté.*</em></p>
-                    <p class="vn-speaker"><strong>Prêtresse Enheduanna :</strong> « Halte ! Qui ose troubler la paix des Dieux ? En Mésopotamie, le rang de chaque âme est fixé par sa <strong>naissance</strong> et la <strong>spécialisation de son travail</strong> ! »</p>
-                    <p class="vn-speaker"><strong>Prêtresse Enheduanna :</strong> « Du <strong>Roi</strong> absolu, en passant par les <strong>Nobles</strong>, les <strong>Fonctionnaires & Scribes</strong>, le <strong>Peuple</strong> d'artisans et paysans, jusqu'aux <strong>Esclaves</strong>... Prouve ta connaissance de l'ordre social pour démasquer les imposteurs ! »</p>
+                    <p class="vn-speech-action"><em>*Des torches éclairent le sanctuaire d'Ishtar. La Grande Prêtresse t'arrête net d'un geste impérieux.*</em></p>
+                    <p class="vn-speaker"><strong>Prêtresse Enheduanna :</strong> « Halte ! Qui ose fouler le domaine sacré ? {HERO_ORIGIN_CALL}, {HERO_PAST}... Crois-tu que ton titre de {HERO_TITLE} suffise devant les dieux ? En Mésopotamie, chaque être humain a un rang immuable fixé par sa naissance et sa fonction ! »</p>
+                    <p class="vn-speaker"><strong>Prêtresse Enheduanna :</strong> « Du Roi tout-puissant aux nobles, scribes, artisans libres jusqu'aux esclaves : prouve que tu maîtrises l'ordre de notre <strong class="vn-concept-highlight" data-glossary="hierarchie_sociale">société</strong> en 5 degrés avant de gravir l'escalier céleste ! »</p>
                 </div>
             `,
             choices: [
@@ -589,11 +640,14 @@ const STORY_DATA = {
             character: "Conseiller Royal Lu-Enlil",
             characterRole: "Haut Dignitaire Traître",
             conceptUnlocked: "gilgamesh",
+            sound: "tension",
+            shake: "heavy",
+            flash: true,
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Un panneau secret de l'autel divin s'ouvre brusquement. Un homme drapé de soie pourpre et d'or tente de s'enfuir avec un coffret !*</em></p>
-                    <p class="vn-speaker"><strong>Conseiller Lu-Enlil :</strong> <em>(sourire narquois)</em> « Trop tard, vermisseaux ! Le Roi Hammurabi vient de promulguer ses <strong>lois écrites</strong> à Babylone. J'allais faire effacer les gravures de la stèle pour que nos vols restent impunis ! »</p>
-                    <p class="vn-speaker"><strong>Conseiller Lu-Enlil :</strong> « Si vous osez me défier, retrouvez-moi devant le trône royal de Babylone. La parole d'un noble écrasera la vôtre ! »</p>
+                    <p class="vn-speech-action"><em>*Une dalle pivote dans un grincement ! Le Conseiller Lu-Enlil bondit, serrant un coffret royal contre sa poitrine.*</em></p>
+                    <p class="vn-speaker"><strong>Conseiller Lu-Enlil :</strong> <em>(ricanant)</em> « Trop tard ! Le Roi <strong class="vn-concept-highlight" data-glossary="hammurabi">Hammurabi</strong> promulgue ses lois écrites à Babylone, mais j'allais faire briser la stèle ! »</p>
+                    <p class="vn-speaker"><strong>Conseiller Lu-Enlil :</strong> « Vous n'êtes rien face à un noble du Conseil. Si vous osez, venez m'affronter devant le trône royal ! »</p>
                 </div>
             `,
             choices: [
@@ -604,6 +658,7 @@ const STORY_DATA = {
                     impact: { savoir: +18, influence: +12 },
                     impactTag: "📜 SCRIBE • Sagesse de Gilgamesh",
                     sound: "clay",
+                    shake: "light",
                     setFlags: { scribe_recited_gilgamesh: true },
                     addClue: "Manuscrit original de l'Épopée prouvant la loyauté",
                     butterflyEffect: "La Grande Prêtresse soutiendra votre témoignage au procès.",
@@ -616,6 +671,7 @@ const STORY_DATA = {
                     impact: { influence: +18, destin: +12 },
                     impactTag: "🛡️ SOLDAT • Interception héroïque",
                     sound: "chisel",
+                    shake: "medium",
                     setFlags: { soldat_seized_traitor_chest: true },
                     addClue: "Coffret de documents royaux subtilisé au traître",
                     butterflyEffect: "Les preuves matérielles de Lu-Enlil sont directement entre vos mains.",
@@ -628,6 +684,7 @@ const STORY_DATA = {
                     impact: { richesse: +15, savoir: +12 },
                     impactTag: "🏺 ARTISAN • Expertise métallique",
                     sound: "coins",
+                    shake: "light",
                     setFlags: { artisan_identified_royal_gold: true },
                     addClue: "Marque d'or royal de Lagash détourné",
                     butterflyEffect: "La cité de Lagash envoie ses représentants appuyer votre cause.",
@@ -640,6 +697,7 @@ const STORY_DATA = {
                     impact: { destin: +18, savoir: +12 },
                     impactTag: "🌾 BÂTISSEUR • Maîtrise des mécanismes",
                     sound: "choice",
+                    shake: "light",
                     setFlags: { batisseur_locked_temple_trap: true },
                     addClue: "Mécanisme secret de la Ziggourat sécurisé",
                     butterflyEffect: "Les gardes du temple capturent l'ensemble des complices en fuite.",
@@ -651,6 +709,7 @@ const STORY_DATA = {
                     impact: { influence: +15, destin: +15 },
                     impactTag: "Vers le Grand Jugement d'Hammurabi ➔",
                     sound: "chisel",
+                    shake: "light",
                     setFlags: { pursued_traitor_to_court: true },
                     nextNode: "ch4_hammurabi_intro"
                 }
@@ -669,12 +728,13 @@ const STORY_DATA = {
             character: "Le Roi Hammurabi",
             characterRole: "Souverain de Babylone et Grand Législateur",
             conceptUnlocked: "code_hammurabi",
+            sound: "chisel",
+            shake: "medium",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Au centre de la cour royale se dresse une imposante stèle de basalte noir haute de plus de deux mètres, gravée de centaines de lois en cunéiforme.*</em></p>
-                    <p class="vn-speaker"><strong>Conseiller Lu-Enlil :</strong> <em>(à genoux devant le trône)</em> « Majesté ! Cet insolent m'accuse faussement ! Selon votre loi sacrée, l'accusateur sans preuve doit subir la peine capitale ! »</p>
-                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> <em>(voix puissante et posée)</em> « Silence ! En cette année <strong>1750 av. J.-C.</strong>, Babylone est puissante. Mais la force ne fait pas le droit : la loi doit être <strong>écrite</strong> pour s'appliquer de la même façon à tous et protéger le faible contre le fort ! »</p>
-                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> « Avance, et prouve ta maîtrise de mon <strong>Code de lois</strong> face à cette assemblée ! »</p>
+                    <p class="vn-speech-action"><em>*Au centre du palais se dresse la stèle de basalte noir de plus de deux mètres, gravée de lois cunéiformes.*</em></p>
+                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> « Silence dans mon tribunal ! En <strong>1750 av. J.-C.</strong>, Babylone ne tolère plus la loi du plus fort. La justice doit être <strong class="vn-concept-highlight" data-glossary="code_hammurabi">écrite</strong> pour protéger le faible ! »</p>
+                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> « Lu-Enlil t'accuse de trahison, {HERO_ORIGIN_CALL}. Mais moi, je me souviens de ton serment, {HERO_PAST}. En tant que {HERO_TITLE}, avance devant ma stèle de basalte : prouve ta connaissance de mon Code de lois et fais triompher la vérité ! »</p>
                 </div>
             `,
             choices: [
@@ -683,6 +743,96 @@ const STORY_DATA = {
                     impact: { savoir: +15, influence: +15 },
                     impactTag: "Jugement Royal • Procès d'Hammurabi",
                     minigame: "hammurabi_trial",
+                    nextNode: "ch4_moral_dilemma_artisan"
+                }
+            ]
+        },
+
+        // --- DILEMME MORAL & ÉTHIQUE DU CODE D'HAMMOURABI ---
+        "ch4_moral_dilemma_artisan": {
+            id: "ch4_moral_dilemma_artisan",
+            chapter: "Chapitre IV",
+            chapterTitle: "Le Dilemme Éthique du Code",
+            location: "Tribunal Royal de Babylone • Devant la Stèle de Basalte",
+            bgImage: "assets/images/scene_babylon_market.jpg",
+            character: "Le Roi Hammurabi",
+            characterRole: "Souverain et Grand Législateur",
+            conceptUnlocked: "code_hammurabi",
+            sound: "tension",
+            shake: "medium",
+            text: `
+                <div class="vn-dialogue">
+                    <p class="vn-speech-action"><em>*Les délibérations s'achèvent, mais le Roi lève la main pour suspendre la séance. Un homme en haillons tremble devant la stèle.*</em></p>
+                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> « Regarde cet accusé, {HERO_ORIGIN_CALL}. Il se nomme Nannar, un artisan potier d'Ur. Une crue dévastatrice a anéanti son atelier et toutes ses réserves. Pour sauver ses trois enfants de la famine, il a brisé de nuit le sceau d'un grenier public pour dérober deux mesures d'orge. »</p>
+                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> « Mes juges réclament la lettre stricte de mon Code : l'amputation ou la mort pour tout viol de grenier royal. Mais la foule gronde, prête à la sédition. Toi, {HERO_TITLE}, quelle sentence ordonnes-tu au nom de Babylone ? »</p>
+                </div>
+            `,
+            choices: [
+                // Option A : « La Loi est la Loi » (Condamnation exemplaire)
+                {
+                    text: "Appliquer la sentence du Code sans défaillir : la loi écrite doit être égale pour tous, sans exception émotionnelle.",
+                    impact: { savoir: +15, destin: +10, influence: -20 },
+                    impactTag: "⚖️ LOI STRICTE • +15 Savoir, +10 Destin, -20 Influence Populaire",
+                    sound: "chisel",
+                    shake: "medium",
+                    setFlags: { hammurabi_strict_justice: true, flag_verdict: "strict" },
+                    butterflyEffect: "Votre réputation de juge impitoyable gagne Babylone. Le Roi approuve votre rigueur, mais les classes populaires se méfient désormais de vous.",
+                    nextNode: "ch4_trial_consequences"
+                },
+                // Option B : « L'Équité Supérieure » (Grâce motivée par la famine)
+                {
+                    text: "Commuer la peine corporelle en don d'argile aux greniers : nul ne doit périr pour avoir nourri les siens en temps de crue.",
+                    impact: { influence: +20, destin: +10, savoir: -15, richesse: -10 },
+                    impactTag: "🕊️ CLÉMENCE • +20 Influence, +10 Destin, -15 Savoir Institutionnel",
+                    sound: "clay",
+                    shake: "light",
+                    setFlags: { hammurabi_clemency_granted: true, flag_verdict: "clemency" },
+                    butterflyEffect: "Le peuple de Babylone acclame votre bonté. En revanche, les magistrats conservateurs estiment que vous affaiblissez l'autorité royale.",
+                    nextNode: "ch4_trial_consequences"
+                },
+                // Option C : Choix Exclusifs de Classe
+                {
+                    reqClass: "scribe",
+                    text: "Dénicher un article méconnu du Code d'Ur-Nammu autorisant la compensation pécuniaire différée.",
+                    impact: { savoir: +20, influence: +5, richesse: -10 },
+                    impactTag: "📜 SCRIBE • Jurisprudence d'Ur-Nammu",
+                    sound: "clay",
+                    shake: "light",
+                    setFlags: { hammurabi_metier_justice: true, flag_verdict: "metier" },
+                    butterflyEffect: "Les scribes saluent votre érudition juridique. Le Roi accepte le précédent légal d'Ur-Nammu.",
+                    nextNode: "ch4_trial_consequences"
+                },
+                {
+                    reqClass: "artisan",
+                    text: "Avancer les deux mesures d'orge sur ses propres bénéfices de troc fluvial.",
+                    impact: { richesse: -20, influence: +25, destin: +10 },
+                    impactTag: "🏺 ARTISAN • Rachat par guilde & troc",
+                    sound: "coins",
+                    shake: "light",
+                    setFlags: { hammurabi_metier_justice: true, flag_verdict: "metier" },
+                    butterflyEffect: "La guilde des artisans vous voue une fidélité éternelle pour avoir racheté la dette de Nannar.",
+                    nextNode: "ch4_trial_consequences"
+                },
+                {
+                    reqClass: "soldat",
+                    text: "Prendre l'artisan sous sa garde personnelle et l'affecter aux corvées de fortification.",
+                    impact: { influence: +12, destin: +15, savoir: -8 },
+                    impactTag: "🛡️ SOLDAT • Enrôlement sur les remparts",
+                    sound: "chisel",
+                    shake: "medium",
+                    setFlags: { hammurabi_metier_justice: true, flag_verdict: "metier" },
+                    butterflyEffect: "L'artisan sert loyalement sous votre commandement aux remparts pour réparer sa faute.",
+                    nextNode: "ch4_trial_consequences"
+                },
+                {
+                    reqClass: "batisseur",
+                    text: "Réquisitionner l'homme pour colmater les vannes du canal royal ayant causé la famine.",
+                    impact: { destin: +20, richesse: +5, influence: -10 },
+                    impactTag: "🌾 BÂTISSEUR • Travaux de digues d'utilité publique",
+                    sound: "water",
+                    shake: "light",
+                    setFlags: { hammurabi_metier_justice: true, flag_verdict: "metier" },
+                    butterflyEffect: "Les vannes sont consolidées avec son aide et la cité est protégée contre les crues.",
                     nextNode: "ch4_trial_consequences"
                 }
             ]
@@ -697,12 +847,15 @@ const STORY_DATA = {
             character: "Le Roi Hammurabi",
             characterRole: "Roi de Babylone",
             conceptUnlocked: "code_hammurabi",
+            sound: "chisel",
+            shake: "medium",
+            flash: true,
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Le Roi Hammurabi frappe le sol de son sceptre doré. La foule retient son souffle.*</em></p>
-                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> « Ta plaidoirie est irréfutable ! Les lois gravées dans la pierre protègent l'ordre et l'équité. Les traîtres sont déchus, leurs terres restituées aux paysans et leurs crimes châtiés selon la <strong>loi du Talion</strong> ! »</p>
-                    <p class="vn-speech-action"><em>*Tandis que les gardes enchaînent Lu-Enlil, ce dernier crache un ultime défi.*</em></p>
-                    <p class="vn-speaker"><strong>Conseiller Lu-Enlil :</strong> « Vous n'avez rien gagné... Notre navire amiral cingle déjà vers le <strong>Nil</strong> avec nos trésors pour soulever l'<strong>Égypte ancienne</strong> contre vous ! »</p>
+                    <p class="vn-speech-action"><em>*Le Roi frappe le dallage de son sceptre doré. La sentence tombe, glaciale et sans appel.*</em></p>
+                    <p class="vn-speaker"><strong>Le Roi Hammurabi :</strong> « Verdict irréfutable, {HERO_NAME} ! Selon la <strong class="vn-concept-highlight" data-glossary="loi_talion">loi du Talion</strong> — œil pour œil —, les coupables perdront leurs biens et leurs titres. Justice est rendue ! »</p>
+                    <p class="vn-speech-action"><em>*Enchaîné par les gardes, Lu-Enlil ricane une dernière fois avec haine.*</em></p>
+                    <p class="vn-speaker"><strong>Conseiller Lu-Enlil :</strong> « Vous arrivez trop tard... Nos navires font déjà voile vers le <strong class="vn-concept-highlight" data-glossary="nil">Nil</strong> pour embraser toute l'Égypte ! »</p>
                 </div>
             `,
             choices: [
@@ -713,10 +866,11 @@ const STORY_DATA = {
                     impact: { savoir: +20, influence: +15 },
                     impactTag: "📜 SCRIBE • Traité diplomatique scellé",
                     sound: "papyrus",
+                    shake: "light",
                     setFlags: { scribe_pharaoh_treaty: true },
                     addClue: "Traité officiel d'alliance entre les Deux Fleuves",
                     butterflyEffect: "Le Pharaon vous accueillera avec les plus grands honneurs d'État.",
-                    nextNode: "ch4_timeline_node"
+                    nextNode: "ch4_fluvial_departure"
                 },
                 // Choix exclusif Soldat
                 {
@@ -725,10 +879,11 @@ const STORY_DATA = {
                     impact: { influence: +20, destin: +15 },
                     impactTag: "🛡️ SOLDAT • Commandement de la flotte",
                     sound: "chisel",
+                    shake: "medium",
                     setFlags: { soldat_naval_command: true },
                     addClue: "Étendard de guerre de l'alliance fluviale",
                     butterflyEffect: "Votre flotte intercepte les fuyards dès leur entrée dans le delta du Nil.",
-                    nextNode: "ch4_timeline_node"
+                    nextNode: "ch4_fluvial_departure"
                 },
                 // Choix exclusif Artisan
                 {
@@ -737,10 +892,11 @@ const STORY_DATA = {
                     impact: { richesse: +20, influence: +15 },
                     impactTag: "🏺 ARTISAN • Financement maritime",
                     sound: "coins",
+                    shake: "light",
                     setFlags: { artisan_egypt_trade_route: true },
                     addClue: "Contrat de monopole commercial avec l'Égypte",
                     butterflyEffect: "Les marchands du Nil vous offrent leurs embarcations les plus rapides.",
-                    nextNode: "ch4_timeline_node"
+                    nextNode: "ch4_fluvial_departure"
                 },
                 // Choix exclusif Bâtisseur
                 {
@@ -749,10 +905,11 @@ const STORY_DATA = {
                     impact: { destin: +20, savoir: +15 },
                     impactTag: "🌾 BÂTISSEUR • Ingénierie navale",
                     sound: "water",
+                    shake: "light",
                     setFlags: { batisseur_naval_upgrade: true },
                     addClue: "Plan d'amélioration des bateaux fluviaux",
                     butterflyEffect: "Vos bateaux atteignent l'Égypte avec une avance décisive.",
-                    nextNode: "ch4_timeline_node"
+                    nextNode: "ch4_fluvial_departure"
                 },
                 // Choix universels
                 {
@@ -760,7 +917,69 @@ const STORY_DATA = {
                     impact: { influence: +15, richesse: +10, destin: +20 },
                     impactTag: "Cap sur l'Égypte Antique (Chapitre V) ➔",
                     sound: "water",
+                    shake: "light",
                     setFlags: { royal_mission_egypt: true },
+                    nextNode: "ch4_fluvial_departure"
+                }
+            ]
+        },
+
+        // --- DÉPART FLUVIAL & RETENTISSEMENT DU VERDICT ---
+        "ch4_fluvial_departure": {
+            id: "ch4_fluvial_departure",
+            chapter: "Chapitre IV",
+            chapterTitle: "Les Quais de Babylone : Le Poids des Actes",
+            location: "Port fluvial de Babylone • Quai des Départs vers l'Égypte",
+            bgImage: "assets/images/scene_babylon_market.jpg",
+            character: "Sin-Iddinam le Batelier",
+            characterRole: "Maître des Quais et Batelier Fluvial",
+            conceptUnlocked: "commerce_troc",
+            sound: "water",
+            shake: "light",
+            text: `
+                <div class="vn-dialogue">
+                    <p class="vn-speech-action"><em>*Les barges d'expédition sont amarrées le long de l'Euphrate, prêtes pour le long périple vers le Nil.*</em></p>
+                    {PORT_VERDICT_ECHO}
+                </div>
+            `,
+            choices: [
+                {
+                    reqFlag: "hammurabi_strict_justice",
+                    text: "Les bateliers refusent de charger les vivres de secours sans ordre royal écrit. Assumer la traversée dans des conditions difficiles.",
+                    impact: { destin: -5 },
+                    impactTag: "⚠️ RANCŒUR DU PEUPLE • -5 Destin (Rations réduites)",
+                    sound: "water",
+                    shake: "medium",
+                    butterflyEffect: "Les mariniers vous craignent et gardent leurs distances tout au long de la traversée.",
+                    nextNode: "ch4_timeline_node"
+                },
+                {
+                    reqFlag: "hammurabi_clemency_granted",
+                    text: "Recevoir le talisman d'obsidienne offert en secret par la famille de Nannar et hisser les voiles avec la bénédiction populaire.",
+                    impact: { destin: +5, influence: +5 },
+                    impactTag: "🕊️ GRATITUDE DU PEUPLE • Amulette protectrice reçue",
+                    addClue: "Amulette d'obsidienne de l'artisan gracié",
+                    sound: "coins",
+                    shake: "light",
+                    butterflyEffect: "La bénédiction des artisans et l'amulette d'obsidienne galvanisent l'équipage.",
+                    nextNode: "ch4_timeline_node"
+                },
+                {
+                    reqFlag: "hammurabi_metier_justice",
+                    text: "Prendre la tête d'une flotte parfaitement ravitaillée grâce à l'accord passé avec les corporations de métier.",
+                    impact: { destin: +5, influence: +5 },
+                    impactTag: "🤝 RESPECT DES CORPORATIONS • Flotte parée pour le Nil",
+                    sound: "water",
+                    shake: "light",
+                    butterflyEffect: "Les corporations d'artisans et la garde assurent une traversée fluide vers le delta du Nil.",
+                    nextNode: "ch4_timeline_node"
+                },
+                {
+                    text: "Larguer les amarres et hisser les voiles en direction du delta du Nil.",
+                    impact: { destin: +5 },
+                    impactTag: "Cap sur le Nil ➔",
+                    sound: "water",
+                    shake: "light",
                     nextNode: "ch4_timeline_node"
                 }
             ]
@@ -776,12 +995,14 @@ const STORY_DATA = {
             character: "Le Grand Chroniqueur",
             characterRole: "Gardien des Mémoires Antiques",
             conceptUnlocked: "chronologie_croissant",
+            sound: "papyrus",
+            shake: "light",
             mood: "mystery",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Avant d'embarquer pour le long périple vers le Nil, le grand chroniqueur déroule une magnifique fresque sur papyrus et tablettes.*</em></p>
-                    <p class="vn-speaker"><strong>Le Grand Chroniqueur :</strong> « {HERO_NAME}, pour comprendre la puissance de nos civilisations fluviales, tu dois maîtriser l'ordre des grandes dates du <strong data-glossary="croissant_fertile">Croissant fertile</strong> et de l'histoire universelle ! »</p>
-                    <p class="vn-speaker"><strong>Le Grand Chroniqueur :</strong> « Remets chaque événement clé à sa place sur la ligne du temps, des premiers villages jusqu'à l'Antiquité tardive ! »</p>
+                    <p class="vn-speech-action"><em>*Dans la bibliothèque royale, un parchemin immense s'illumine sous les lampes à huile.*</em></p>
+                    <p class="vn-speaker"><strong>Le Grand Chroniqueur :</strong> « Avant de cingler vers le Nil, {HERO_ORIGIN_CALL}, toi qui as œuvré comme {HERO_TITLE}, tu dois situer notre épopée dans la grande histoire du monde. »</p>
+                    <p class="vn-speaker"><strong>Le Grand Chroniqueur :</strong> « De la naissance de l'agriculture à l'écriture cunéiforme et aux pyramides : ordonne les siècles sur la ligne du temps ! »</p>
                 </div>
             `,
             choices: [
@@ -808,11 +1029,13 @@ const STORY_DATA = {
             character: "Le Vizir Rekhmirê",
             characterRole: "Grand Administrateur du Pharaon",
             conceptUnlocked: "egypte_nil",
+            sound: "flood",
+            shake: "medium",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Votre navire glisse sur les eaux dorées du Nil. À l'horizon s'élèvent les Pyramides colossales de Khéops et d'Amenemhat Ier, tombeaux éternels des rois.*</em></p>
-                    <p class="vn-speaker"><strong>Le Vizir Rekhmirê :</strong> « Bienvenue en terre d'Égypte ! Ici, toute vie dépend de la <strong>crue des eaux</strong> qui dépose le limon noir fertilisant nos terres. »</p>
-                    <p class="vn-speaker"><strong>Le Vizir Rekhmirê :</strong> « Les rebelles que vous pourchassez ont bloqué nos bassins de retenue pour affamer le pays ! Aidez-nous à sécuriser les canaux et à déchiffrer leurs messages en <strong>hiéroglyphes</strong> ! »</p>
+                    <p class="vn-speech-action"><em>*Ta barge fend les eaux miroitantes du Nil. Au loin se découpent les majestueuses Pyramides sous le soleil couchant.*</em></p>
+                    <p class="vn-speaker"><strong>Le Vizir Rekhmirê :</strong> « Gloire au Nil ! Ici en Égypte, notre survie dépend de la <strong class="vn-concept-highlight" data-glossary="crue_nil">crue annuelle</strong> qui dépose le limon noir fertile sur nos champs. »</p>
+                    <p class="vn-speaker"><strong>Le Vizir Rekhmirê :</strong> « Mais les rebelles ont fermé les canaux d'irrigation pour assécher la plaine ! {HERO_ORIGIN_CALL}, {VERDICT_REPUTATION} Prends la direction des vannes et sauve nos récoltes ! »</p>
                 </div>
             `,
             choices: [
@@ -835,11 +1058,13 @@ const STORY_DATA = {
             character: "Le Grand Pharaon",
             characterRole: "Chef Suprême, Commandant des Armées et Dieu Vivant",
             conceptUnlocked: "alphabet_phenicien",
+            sound: "fanfare",
+            shake: "light",
             text: `
                 <div class="vn-dialogue">
-                    <p class="vn-speech-action"><em>*Dans la grandiose salle hypostyle baignée de lumière, le Pharaon trône avec le sceptre et le fouet d'or devant les scribes et grands dignitaires des deux civilisations.*</em></p>
-                    <p class="vn-speaker"><strong>Le Pharaon :</strong> « Les traîtres sont neutralisés et nos récoltes sont sauvées ! En tant que <strong>dieu vivant</strong>, chef des armées, juge suprême et maître de l'administration, je salue ta bravoure ! »</p>
-                    <p class="vn-speaker"><strong>Le Pharaon :</strong> « Avant de recevoir les honneurs suprêmes et ton Diplôme d'Élite du Croissant Fertile, tu dois prouver devant le Conseil des Scribes ta maîtrise complète des savoirs du <strong>Module 3 d'Histoire</strong>. L'assemblée royale t'écoute ! »</p>
+                    <p class="vn-speech-action"><em>*Au cœur de la grande salle hypostyle, le Pharaon brandit le sceptre et le fléau royal devant l'assemblée unie.*</em></p>
+                    <p class="vn-speaker"><strong>Le Pharaon :</strong> « Les rebelles sont vaincus et les deux fleuves sont en paix ! En tant que roi et dieu vivant, je rends hommage à ton courage, noble {HERO_TITLE} {HERO_NAME}. {VERDICT_REPUTATION} »</p>
+                    <p class="vn-speaker"><strong>Le Pharaon :</strong> « Mais avant de recevoir ton titre suprême de Maître du Croissant Fertile, réponds sans faillir aux questions des grands savants. Montre-nous ce que tu as appris ! »</p>
                 </div>
             `,
             choices: [

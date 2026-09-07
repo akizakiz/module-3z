@@ -45,7 +45,7 @@ class MiniGamesManager {
         }
 
         // Enregistrer la complétion dans le moteur de jeu
-        if (window.gameEngine) {
+        if (window.gameEngine && typeof window.gameEngine.recordMinigameCompletion === "function") {
             const isFirstTry = (this.attemptCounts[this.currentMinigame] || 1) <= 1;
             window.gameEngine.recordMinigameCompletion(this.currentMinigame, isFirstTry);
         }
@@ -333,8 +333,8 @@ class MiniGamesManager {
             }
 
             setTimeout(() => {
-                this.renderWritingTimelineSynthesis();
-            }, 1600);
+                this.renderCuneiformCarvingWorkshop();
+            }, 1400);
         } else {
             let errorDetail = "";
             if (this.writingSelected[0] !== 1) {
@@ -366,6 +366,381 @@ class MiniGamesManager {
             hintHtml += `</div>`;
             feedbackArea.innerHTML = hintHtml;
             if (window.soundEngine) window.soundEngine.playChoice();
+        }
+    }
+
+    // =========================================================================
+    // ÉTAPE TACTILE GESTUELLE : GRAVURE DU CUNÉIFORME AU CALAME DANS L'ARGILE
+    // =========================================================================
+    renderCuneiformCarvingWorkshop() {
+        const container = document.getElementById("minigame-content");
+        if (!container) return;
+
+        // Le signe sumérien sacré 𒀭 (DINGIR : Ciel, Dieu) composé de 4 clous cunéiformes
+        this.cuneiformStrokes = [
+            { id: 0, name: "Clou Horizontal (Terre/Horizon)", head: { x: 170, y: 160 }, tail: { x: 390, y: 160 }, angle: 0, completed: false },
+            { id: 1, name: "Clou Vertical (Axe Céleste)", head: { x: 280, y: 55 }, tail: { x: 280, y: 265 }, angle: Math.PI / 2, completed: false },
+            { id: 2, name: "Clou Oblique Descendant", head: { x: 195, y: 75 }, tail: { x: 365, y: 245 }, angle: Math.PI / 4, completed: false },
+            { id: 3, name: "Clou Oblique Montant", head: { x: 195, y: 245 }, tail: { x: 365, y: 75 }, angle: -Math.PI / 4, completed: false }
+        ];
+
+        this.cuneiIsCarving = false;
+        this.cuneiActiveStroke = null;
+        this.cuneiCarvingProgress = 0;
+
+        container.innerHTML = `
+            <div class="minigame-header">
+                <div>
+                    <h3 class="minigame-title">🖋️ L'Atelier du Scribe : Gravure Gestuelle au Calame</h3>
+                    <span style="color:var(--gold-light); font-size:0.9rem;">Module 3 • Maniement du roseau biseauté dans l'argile fraîche</span>
+                </div>
+                <button class="hud-btn" style="padding:6px 14px; font-size:0.85rem;" onclick="window.codexManager.openModal('evolution_ecriture')">📖 Codex</button>
+            </div>
+
+            <div class="clay-carving-studio">
+                <p class="minigame-instructions" style="margin-top:0;">
+                    L'écriture cunéiforme (<em>cuneus</em> = « coin » en latin) se réalisait en deux gestes tangibles :
+                    <strong>enfoncer la pointe triangulaire</strong> du roseau dans l'argile humide pour imprimer la tête du coin,
+                    puis <strong>glisser</strong> fermement pour inciser la tige rectiligne.
+                    Gravez le signe sacré <strong>𒀭 (DINGIR)</strong> (le Ciel / le Divin) en suivant les 4 repères dorés.
+                </p>
+
+                <div class="clay-canvas-frame">
+                    <canvas id="clay-tablet-canvas" width="560" height="320"></canvas>
+                </div>
+
+                <div class="clay-carving-toolbar">
+                    <div class="cuneiform-progress-tracker" id="cuneiform-tracker">
+                        <span style="color:var(--gold-light); font-size:0.88rem; font-weight:bold;">Coins gravés :</span>
+                        <div class="cuneiform-badge" id="cunei-badge-0">1</div>
+                        <div class="cuneiform-badge" id="cunei-badge-1">2</div>
+                        <div class="cuneiform-badge" id="cunei-badge-2">3</div>
+                        <div class="cuneiform-badge" id="cunei-badge-3">4</div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="hud-btn" onclick="window.minigames.resetCuneiformCanvas()">🔄 Lisser l'Argile</button>
+                        <button class="hud-btn" style="background:rgba(212,175,55,0.25); border-color:var(--gold-primary);" onclick="window.minigames.carveNextWedgeAuto()">
+                            🖋️ Enfoncer le Calame (Aide)
+                        </button>
+                    </div>
+                </div>
+
+                <div id="cuneiform-feedback-area" style="margin-top:14px;">
+                    <div class="formative-feedback feedback-hint">
+                        💡 <strong>Geste du scribe :</strong> Cliquez ou touchez l'un des cercles dorés pour enfoncer la tête du coin, puis glissez le calame vers l'autre extrémité pour marquer l'argile.
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.initCuneiformCanvas();
+    }
+
+    initCuneiformCanvas() {
+        const canvas = document.getElementById("clay-tablet-canvas");
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
+        this.cuneiCanvas = canvas;
+        this.cuneiCtx = ctx;
+
+        this.drawCuneiformScene();
+
+        const getCanvasCoords = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        };
+
+        canvas.onpointerdown = (e) => {
+            canvas.setPointerCapture(e.pointerId);
+            const pos = getCanvasCoords(e);
+
+            // Rechercher si le clic touche la tête d'un clou non complété (rayon 38px)
+            const targetStroke = this.cuneiformStrokes.find(st => {
+                if (st.completed) return false;
+                const dx = pos.x - st.head.x;
+                const dy = pos.y - st.head.y;
+                return Math.sqrt(dx * dx + dy * dy) < 38;
+            });
+
+            if (targetStroke) {
+                this.cuneiIsCarving = true;
+                this.cuneiActiveStroke = targetStroke;
+                this.cuneiCarvingProgress = 0.15;
+                if (window.soundEngine) {
+                    window.soundEngine.playClay();
+                    window.soundEngine.playChisel();
+                }
+                this.drawCuneiformScene(pos);
+            }
+        };
+
+        canvas.onpointermove = (e) => {
+            if (!this.cuneiIsCarving || !this.cuneiActiveStroke) return;
+            const pos = getCanvasCoords(e);
+            const st = this.cuneiActiveStroke;
+
+            const totalDist = Math.hypot(st.tail.x - st.head.x, st.tail.y - st.head.y);
+            const curDist = Math.hypot(pos.x - st.head.x, pos.y - st.head.y);
+            this.cuneiCarvingProgress = Math.min(1, Math.max(0.15, curDist / totalDist));
+
+            this.drawCuneiformScene(pos);
+        };
+
+        canvas.onpointerup = (e) => {
+            if (!this.cuneiIsCarving || !this.cuneiActiveStroke) return;
+            const pos = getCanvasCoords(e);
+            const st = this.cuneiActiveStroke;
+
+            const totalDist = Math.hypot(st.tail.x - st.head.x, st.tail.y - st.head.y);
+            const curDist = Math.hypot(pos.x - st.head.x, pos.y - st.head.y);
+            const tailDist = Math.hypot(pos.x - st.tail.x, pos.y - st.tail.y);
+
+            // Succès si étiré à plus de 60% ou relâché près de la queue
+            if (curDist / totalDist >= 0.55 || tailDist < 40) {
+                st.completed = true;
+                if (window.soundEngine) {
+                    window.soundEngine.playClay();
+                }
+                this.updateCuneiformBadges();
+                this.checkCuneiformCompletion();
+            }
+
+            this.cuneiIsCarving = false;
+            this.cuneiActiveStroke = null;
+            this.cuneiCarvingProgress = 0;
+            this.drawCuneiformScene();
+        };
+
+        canvas.onpointercancel = () => {
+            this.cuneiIsCarving = false;
+            this.cuneiActiveStroke = null;
+            this.drawCuneiformScene();
+        };
+    }
+
+    drawCuneiformScene(activePointerPos = null) {
+        if (!this.cuneiCanvas || !this.cuneiCtx) return;
+        const ctx = this.cuneiCtx;
+        const w = this.cuneiCanvas.width;
+        const h = this.cuneiCanvas.height;
+
+        // 1. Texture de la motte d'argile fraîche
+        ctx.save();
+        const grad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, w / 1.7);
+        grad.addColorStop(0, "#b87a38");
+        grad.addColorStop(0.5, "#935a22");
+        grad.addColorStop(1, "#542e0f");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Micro-fissures et grains d'argile
+        ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+        for (let i = 0; i < 40; i++) {
+            const rx = (i * 37) % w;
+            const ry = (i * 53) % h;
+            ctx.beginPath();
+            ctx.arc(rx, ry, (i % 3) + 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Cadre biseauté d'enfoncement de tablette
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
+        ctx.lineWidth = 6;
+        ctx.strokeRect(10, 10, w - 20, h - 20);
+        ctx.strokeStyle = "rgba(255, 230, 160, 0.25)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(14, 14, w - 28, h - 28);
+        ctx.restore();
+
+        // 2. Tracé des repères et des coins cunéiformes
+        this.cuneiformStrokes.forEach((st) => {
+            if (st.completed) {
+                this.drawCuneiformWedge(ctx, st, 1.0);
+            } else {
+                // Guideline subtile
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([6, 6]);
+                ctx.strokeStyle = "rgba(253, 224, 71, 0.4)";
+                ctx.lineWidth = 3;
+                ctx.moveTo(st.head.x, st.head.y);
+                ctx.lineTo(st.tail.x, st.tail.y);
+                ctx.stroke();
+
+                // Tête de clou cible
+                ctx.setLineDash([]);
+                ctx.fillStyle = "rgba(245, 158, 11, 0.35)";
+                ctx.strokeStyle = "#fde047";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(st.head.x, st.head.y, 14, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Point central
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(st.head.x, st.head.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        });
+
+        // 3. Clou en cours de gravure active
+        if (this.cuneiIsCarving && this.cuneiActiveStroke) {
+            this.drawCuneiformWedge(ctx, this.cuneiActiveStroke, this.cuneiCarvingProgress);
+        }
+    }
+
+    drawCuneiformWedge(ctx, st, progress) {
+        ctx.save();
+        const head = st.head;
+        const angle = Math.atan2(st.tail.y - st.head.y, st.tail.x - st.head.x);
+        const totalDist = Math.hypot(st.tail.x - st.head.x, st.tail.y - st.head.y);
+        const curLength = totalDist * progress;
+
+        ctx.translate(head.x, head.y);
+        ctx.rotate(angle);
+
+        // Tête triangulaire (empreinte du biseau du roseau)
+        const headW = 24;
+        const headL = 26;
+
+        // Ombre portée profonde dans l'argile
+        ctx.fillStyle = "#221105";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-headL, -headW / 2);
+        ctx.lineTo(-headL, headW / 2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Facette éclairée en relief
+        ctx.fillStyle = "#3d1f0a";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-headL, 0);
+        ctx.lineTo(-headL, headW / 2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Tige creusée (sillon s'étirant et s'effilant)
+        if (curLength > 0) {
+            const furrowW = 8;
+            ctx.fillStyle = "#1e0e04";
+            ctx.beginPath();
+            ctx.moveTo(0, -furrowW / 2);
+            ctx.lineTo(curLength, 0);
+            ctx.lineTo(0, furrowW / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Liseré clair sur le bord de l'argile refoulée
+            ctx.strokeStyle = "rgba(245, 215, 160, 0.4)";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, furrowW / 2);
+            ctx.lineTo(curLength, 0);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    updateCuneiformBadges() {
+        this.cuneiformStrokes.forEach((st, idx) => {
+            const badge = document.getElementById(`cunei-badge-${idx}`);
+            if (badge) {
+                if (st.completed) {
+                    badge.className = "cuneiform-badge done";
+                    badge.innerHTML = "✓";
+                } else if (this.cuneiformStrokes.findIndex(s => !s.completed) === idx) {
+                    badge.className = "cuneiform-badge active";
+                    badge.innerHTML = `${idx + 1}`;
+                }
+            }
+        });
+    }
+
+    carveNextWedgeAuto() {
+        const nextStroke = this.cuneiformStrokes.find(st => !st.completed);
+        if (!nextStroke) return;
+
+        nextStroke.completed = true;
+        if (window.soundEngine) {
+            window.soundEngine.playClay();
+            window.soundEngine.playChisel();
+        }
+
+        this.updateCuneiformBadges();
+        this.drawCuneiformScene();
+        this.checkCuneiformCompletion();
+    }
+
+    resetCuneiformCanvas() {
+        this.cuneiformStrokes.forEach(st => st.completed = false);
+        if (window.soundEngine) window.soundEngine.playClay();
+        this.updateCuneiformBadges();
+        this.drawCuneiformScene();
+        const fb = document.getElementById("cuneiform-feedback-area");
+        if (fb) {
+            fb.innerHTML = `
+                <div class="formative-feedback feedback-hint">
+                    🔄 <em>L'argile a été relissée avec de l'eau.</em> Prenez à nouveau le calame et gravez les 4 coins du signe divin.
+                </div>
+            `;
+        }
+    }
+
+    checkCuneiformCompletion() {
+        const allCompleted = this.cuneiformStrokes.every(st => st.completed);
+        if (!allCompleted) return;
+
+        // Déverrouillage de l'artefact calame et médaille
+        if (window.gameEngine) {
+            window.gameEngine.unlockArtifact("calame");
+            window.gameEngine.unlockMedal("master_scribe");
+        }
+
+        if (window.soundEngine) {
+            window.soundEngine.playSuccess();
+        }
+
+        // Halo d'or sur le canvas
+        if (this.cuneiCtx && this.cuneiCanvas) {
+            const ctx = this.cuneiCtx;
+            ctx.save();
+            ctx.fillStyle = "rgba(253, 224, 71, 0.15)";
+            ctx.fillRect(0, 0, this.cuneiCanvas.width, this.cuneiCanvas.height);
+            ctx.strokeStyle = "rgba(253, 224, 71, 0.8)";
+            ctx.lineWidth = 4;
+            ctx.strokeRect(8, 8, this.cuneiCanvas.width - 16, this.cuneiCanvas.height - 16);
+            ctx.restore();
+        }
+
+        const feedbackArea = document.getElementById("cuneiform-feedback-area");
+        if (feedbackArea) {
+            feedbackArea.innerHTML = `
+                <div class="formative-feedback feedback-success" style="animation: inspectorPop 0.4s ease-out;">
+                    <div style="font-size:1.05rem; margin-bottom:8px;">
+                        ✨ <strong>Gravure Accomplie avec Précision de Maître Scribe !</strong>
+                    </div>
+                    <p style="margin:0 0 10px; line-height:1.5;">
+                        Vous avez parfaitement incisé le signe sumérien <strong>𒀭 (DINGIR)</strong> dans l'argile humide.
+                        Le <strong>Calame en Roseau</strong> a été déposé dans votre <strong>Sacoche d'Artefacts</strong> !
+                    </p>
+                    <button class="btn-primary-start" style="padding:10px 24px; font-size:0.95rem;" onclick="window.minigames.renderWritingTimelineSynthesis()">
+                        Contempler la Tablette & Voir la Synthèse Pédagogique ➔
+                    </button>
+                </div>
+            `;
         }
     }
 
@@ -427,7 +802,7 @@ class MiniGamesManager {
                 items: timelineStages.map(s => ({ title: `${s.date} — ${s.title}`, desc: `${s.desc} (${s.keyNote})` }))
             });
         }
-        if (window.gameEngine) {
+        if (window.gameEngine && typeof window.gameEngine.recordMinigameCompletion === "function") {
             window.gameEngine.recordMinigameCompletion("writing", (this.attemptCounts["writing"] || 1) <= 1);
         }
 
@@ -804,24 +1179,26 @@ class MiniGamesManager {
     }
 
     // =========================================================================
-    // MINI-JEU 4 : LA BALANCE COMMERCIALE D'UR & LE SCEAU-CYLINDRE
+    // MINI-JEU 4 : LA VRAIE BALANCE COMMERCIALE À DEUX PLATEAUX & SCEAU-CYLINDRE
     // =========================================================================
     startTradePuzzle(onComplete) {
         this.onCompleteCallback = onComplete;
         this.currentMinigame = "trade";
         if (!this.attemptCounts["trade"]) this.attemptCounts["trade"] = 0;
 
-        this.exportSlots = [
-            { id: "exp_ble", name: "Blé & Surplus Agricoles", selected: false, correct: true, desc: "Produit en immense abondance grâce aux fleuves fertiles." },
-            { id: "exp_poterie", name: "Poteries & Céramiques", selected: false, correct: true, desc: "Fabriquées à partir de l'argile omniprésente sur les berges." },
-            { id: "exp_bois", name: "Bois de Cèdre du Liban", selected: false, correct: false, desc: "Intrus : Le bois d'œuvre ne poussait pas dans le désert mésopotamien !" }
+        // Catalogue historique des marchandises tangibles
+        this.tradeGoods = [
+            { id: "exp_ble_1", name: "Sac d'Orge des Canaux", weight: 10, icon: "🌾", category: "export", isIntruder: false, desc: "Surplus agricole fluvial d'Ur" },
+            { id: "exp_ble_2", name: "Sac de Blé Moissonné", weight: 10, icon: "🌾", category: "export", isIntruder: false, desc: "Surplus agricole fluvial d'Ur" },
+            { id: "exp_poterie", name: "Jarre de Céramique & Huile", weight: 15, icon: "🏺", category: "export", isIntruder: false, desc: "Artisanat d'argile des rives" },
+            { id: "exp_cedre_intrus", name: "Grume de Bois de Cèdre", weight: 20, icon: "🪵", category: "export", isIntruder: true, desc: "Intrus : Le désert mésopotamien n'a pas de forêts de cèdre !" },
+            { id: "imp_metaux", name: "Lingots de Cuivre & Étain", weight: 20, icon: "⛏️", category: "import", isIntruder: false, desc: "Métaux indispensables pour le bronze" },
+            { id: "imp_lapis", name: "Parure de Lapis-Lazuli", weight: 15, icon: "💎", category: "import", isIntruder: false, desc: "Gemmes précieuses rapportées d'Orient" },
+            { id: "imp_argile_intrus", name: "Brique d'Argile Fluviale", weight: 15, icon: "🧱", category: "import", isIntruder: true, desc: "Intrus : L'argile est omniprésente sur place !" }
         ];
 
-        this.importSlots = [
-            { id: "imp_pierres", name: "Pierres Précieuses & Lapis-lazuli", selected: false, correct: true, desc: "Achetées aux contrées lointaines d'Orient pour les bijoux royaux." },
-            { id: "imp_metaux", name: "Métaux (Cuivre, Étain) & Bois", selected: false, correct: true, desc: "Indispensables pour la métallurgie du bronze et les charpentes." },
-            { id: "imp_argile", name: "Argile des Berges Locales", selected: false, correct: false, desc: "Intrus : L'argile était disponible partout en Mésopotamie, pas importée !" }
-        ];
+        this.leftPanItems = [];
+        this.rightPanItems = [];
 
         this.renderTradePuzzle();
         this.openOverlay();
@@ -834,106 +1211,320 @@ class MiniGamesManager {
         container.innerHTML = `
             <div class="minigame-header">
                 <div>
-                    <h3 class="minigame-title">🏺 La Caravane Marchande & la Balance de Troc</h3>
-                    <span style="color:var(--gold-light); font-size:0.9rem;">Module 3 • Économie, Troc & Contrats</span>
+                    <h3 class="minigame-title">🏺 La Caravane Marchande & la Balance à Deux Plateaux</h3>
+                    <span style="color:var(--gold-light); font-size:0.9rem;">Module 3 • Économie, Troc & Contrats Scellés</span>
                 </div>
                 <button class="hud-btn" style="padding:6px 14px; font-size:0.85rem;" onclick="window.codexManager.openModal('commerce_sciences')">📖 Consulter le Codex</button>
             </div>
 
             <p class="minigame-instructions">
-                Pour équilibrer la balance commerciale de la cité d'Ur, sélectionnez les <strong>2 produits exportés</strong> (produits localement) et les <strong>2 produits importés</strong> (achetés aux pays lointains), puis scellez le contrat avec votre sceau-cylindre.
+                En l'absence de pièces de monnaie, le commerce reposait sur le <strong>troc équitable</strong> pesé au trébuchet.
+                Chargez le <strong>Plateau Gauche</strong> avec les surplus mésopotamiens (grains et poteries)
+                et le <strong>Plateau Droit</strong> avec les ressources rares importées d'Orient.
+                Trouvez l'<strong>équilibre parfait des masses (35 kg = 35 kg)</strong> sans charger les intrus géographiques !
             </p>
 
-            <div class="trade-scale-container">
-                <div class="scale-visual-system">
-                    <div class="scale-pan export-pan">
-                        <div class="pan-header" style="color:#f59e0b;">
-                            <span>🌾</span>
-                            <span>Produits EXPORTÉS par la Mésopotamie :</span>
+            <!-- ÉTAPE 1 : LA BALANCE PHYSIQUE À DEUX PLATEAUX -->
+            <div class="physical-balance-stage" id="balance-stage-area">
+                <div class="scale-fulcrum-zone">
+                    <div class="scale-base-pedestal"></div>
+                    <div class="scale-column-stand"></div>
+                    <div class="scale-pivot-hub"></div>
+                    <div class="scale-pointer-needle" id="scale-needle"></div>
+                    <div class="scale-equilibrium-dial" id="scale-dial-badge">
+                        <span>⚖️</span>
+                        <span id="scale-dial-text">Plateaux Vides (0° - Équilibre à vide)</span>
+                    </div>
+
+                    <!-- FLÉAU BASCULANT -->
+                    <div class="scale-beam-bar" id="scale-beam">
+                        <!-- PLATEAU GAUCHE (EXPORT) -->
+                        <div class="scale-pan-assembly left-assembly" id="left-assembly">
+                            <div class="scale-suspension-chains"></div>
+                            <div class="scale-pan-dish" id="left-pan-dish">
+                                <div class="pan-label-tag">🌾 EXPORT (G)</div>
+                                <div id="left-pan-content" style="display:flex; flex-direction:column; gap:4px; width:100%;"></div>
+                            </div>
                         </div>
-                        <div class="pan-slots">
-                            ${this.exportSlots.map(s => `
-                                <div class="trade-item-pill ${s.selected ? 'trade-selected-export' : ''}" onclick="window.minigames.toggleTradeItem('export', '${s.id}')">
-                                    <span>${s.selected ? '☑️' : '◻️'} ${s.name}</span>
-                                    <span style="font-size:0.75rem; color:#cbd5e1;">${s.selected ? 'Chargé' : 'Cliquer pour charger'}</span>
-                                </div>
-                            `).join('')}
+
+                        <!-- PLATEAU DROIT (IMPORT) -->
+                        <div class="scale-pan-assembly right-assembly" id="right-assembly">
+                            <div class="scale-suspension-chains"></div>
+                            <div class="scale-pan-dish" id="right-pan-dish">
+                                <div class="pan-label-tag">💎 IMPORT (D)</div>
+                                <div id="right-pan-content" style="display:flex; flex-direction:column; gap:4px; width:100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARGO DES MARCHANDISES EN ENTREPÔT -->
+                <div class="trade-warehouse-stage">
+                    <!-- DÉPÔT GAUCHE (EXPORTATION LOCALE) -->
+                    <div class="warehouse-depot">
+                        <div class="depot-header" style="color:#f59e0b;">
+                            <span>🌾 Surplus Locaux (Mésopotamie)</span>
+                            <span style="font-size:0.75rem; color:#cbd5e1;">Cliquer pour charger sur plateau Gauche</span>
+                        </div>
+                        <div class="depot-items-list" id="warehouse-export-list">
+                            ${this.renderWarehouseCategoryHtml("export")}
                         </div>
                     </div>
 
-                    <div class="scale-pan import-pan">
-                        <div class="pan-header" style="color:#38bdf8;">
-                            <span>💎</span>
-                            <span>Produits IMPORTÉS des pays lointains :</span>
+                    <!-- DÉPÔT DROIT (IMPORTATION LOINTAINE) -->
+                    <div class="warehouse-depot">
+                        <div class="depot-header" style="color:#38bdf8;">
+                            <span>💎 Ressources Rares (Importations)</span>
+                            <span style="font-size:0.75rem; color:#cbd5e1;">Cliquer pour charger sur plateau Droit</span>
                         </div>
-                        <div class="pan-slots">
-                            ${this.importSlots.map(s => `
-                                <div class="trade-item-pill ${s.selected ? 'trade-selected-import' : ''}" onclick="window.minigames.toggleTradeItem('import', '${s.id}')">
-                                    <span>${s.selected ? '☑️' : '◻️'} ${s.name}</span>
-                                    <span style="font-size:0.75rem; color:#cbd5e1;">${s.selected ? 'Commandé' : 'Cliquer pour commander'}</span>
-                                </div>
-                            `).join('')}
+                        <div class="depot-items-list" id="warehouse-import-list">
+                            ${this.renderWarehouseCategoryHtml("import")}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="trade-feedback-area"></div>
+            <div id="trade-feedback-area" style="margin-top:14px;"></div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-                <button class="hud-btn" onclick="window.minigames.resetTrade()">🔄 Réinitialiser les Marchandises</button>
-                <button class="btn-primary-start" style="padding:10px 24px;" onclick="window.minigames.validateTrade()">
-                    Apposer le Sceau-Cylindre & Conclure le Troc ➔
-                </button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
+                <button class="hud-btn" onclick="window.minigames.resetTradeScale()">🔄 Vider les Plateaux</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="hud-btn" style="background:rgba(212,175,55,0.25); border-color:var(--gold-primary);" onclick="window.minigames.autoBalanceTrade()">
+                        💡 Aide au Pesage
+                    </button>
+                    <button class="btn-primary-start" style="padding:10px 24px;" onclick="window.minigames.validateTradeScale()">
+                        ⚖️ Vérifier la Balance & Sceller le Contrat ➔
+                    </button>
+                </div>
             </div>
+
+            <!-- ZONE DU WORKSHOP SCEAU-CYLINDRE (RÉVÉLÉE APRÈS ÉQUILIBRE) -->
+            <div id="seal-workshop-container"></div>
         `;
+
+        this.updateBalanceScaleDOM();
     }
 
-    toggleTradeItem(type, itemId) {
-        const list = type === 'export' ? this.exportSlots : this.importSlots;
-        const item = list.find(it => it.id === itemId);
-        if (item) {
-            item.selected = !item.selected;
-            if (window.soundEngine) window.soundEngine.playCoins();
-            this.renderTradePuzzle();
+    renderWarehouseCategoryHtml(category) {
+        return this.tradeGoods
+            .filter(g => g.category === category)
+            .map(item => {
+                const isLoaded = this.leftPanItems.includes(item.id) || this.rightPanItems.includes(item.id);
+                return `
+                    <div class="trade-tangible-item ${isLoaded ? 'placed' : ''}" 
+                         id="item-card-${item.id}"
+                         onclick="window.minigames.togglePhysicalTradeItem('${item.id}')">
+                        <div class="item-left-meta">
+                            <span class="item-icon-em">${item.icon}</span>
+                            <div>
+                                <div class="item-title-txt">${item.name}</div>
+                                <div style="font-size:0.72rem; color:#cbd5e1;">${item.desc}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="item-weight-badge">${item.weight} kg</span>
+                            <span style="font-size:0.8rem; color:${isLoaded ? '#ef4444' : '#fde047'}; font-weight:bold;">
+                                ${isLoaded ? '✕ Retirer' : '+ Charger'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+    }
+
+    togglePhysicalTradeItem(itemId) {
+        const item = this.tradeGoods.find(g => g.id === itemId);
+        if (!item) return;
+
+        // Si déjà dans le plateau gauche, on le retire
+        if (this.leftPanItems.includes(itemId)) {
+            this.leftPanItems = this.leftPanItems.filter(id => id !== itemId);
+        }
+        // Si déjà dans le plateau droit, on le retire
+        else if (this.rightPanItems.includes(itemId)) {
+            this.rightPanItems = this.rightPanItems.filter(id => id !== itemId);
+        }
+        // Sinon on le place dans son plateau respectif
+        else {
+            if (item.category === "export") {
+                this.leftPanItems.push(itemId);
+            } else {
+                this.rightPanItems.push(itemId);
+            }
+        }
+
+        if (window.soundEngine) {
+            window.soundEngine.playCoins();
+            window.soundEngine.playBalanceTilt();
+        }
+
+        this.updateBalanceScaleDOM();
+    }
+
+    updateBalanceScaleDOM() {
+        const beam = document.getElementById("scale-beam");
+        const needle = document.getElementById("scale-needle");
+        const leftAssembly = document.getElementById("left-assembly");
+        const rightAssembly = document.getElementById("right-assembly");
+        const dialText = document.getElementById("scale-dial-text");
+        const dialBadge = document.getElementById("scale-dial-badge");
+        const leftContent = document.getElementById("left-pan-content");
+        const rightContent = document.getElementById("right-pan-content");
+
+        if (!beam || !leftContent || !rightContent) return;
+
+        // Calcul des masses totales
+        const leftGoods = this.tradeGoods.filter(g => this.leftPanItems.includes(g.id));
+        const rightGoods = this.tradeGoods.filter(g => this.rightPanItems.includes(g.id));
+
+        const weightLeft = leftGoods.reduce((sum, g) => sum + g.weight, 0);
+        const weightRight = rightGoods.reduce((sum, g) => sum + g.weight, 0);
+
+        // Physique de bascule
+        const diff = weightRight - weightLeft;
+        const tiltAngle = Math.max(-16, Math.min(16, diff * 1.1));
+        const needleAngle = Math.max(-24, Math.min(24, diff * 1.5));
+
+        // Application des rotations
+        beam.style.transform = `rotate(${tiltAngle}deg)`;
+        if (needle) needle.style.transform = `rotate(${needleAngle}deg)`;
+
+        // Contre-rotation des plateaux pour qu'ils restent parfaitement horizontaux
+        if (leftAssembly) leftAssembly.style.transform = `rotate(${-tiltAngle}deg)`;
+        if (rightAssembly) rightAssembly.style.transform = `rotate(${-tiltAngle}deg)`;
+
+        // Rendu des puces sur le plateau gauche
+        leftContent.innerHTML = leftGoods.length > 0 
+            ? leftGoods.map(g => `
+                <div class="pan-item-chip" onclick="event.stopPropagation(); window.minigames.togglePhysicalTradeItem('${g.id}')">
+                    <span>${g.icon} ${g.name} (${g.weight} kg)</span>
+                    <span style="font-weight:bold; color:#fca5a5;">✕</span>
+                </div>
+            `).join('')
+            : `<span style="font-size:0.75rem; color:#fde047; opacity:0.8;">Plateau vide</span>`;
+
+        // Rendu des puces sur le plateau droit
+        rightContent.innerHTML = rightGoods.length > 0 
+            ? rightGoods.map(g => `
+                <div class="pan-item-chip" onclick="event.stopPropagation(); window.minigames.togglePhysicalTradeItem('${g.id}')">
+                    <span>${g.icon} ${g.name} (${g.weight} kg)</span>
+                    <span style="font-weight:bold; color:#fca5a5;">✕</span>
+                </div>
+            `).join('')
+            : `<span style="font-size:0.75rem; color:#7dd3fc; opacity:0.8;">Plateau vide</span>`;
+
+        // État du cadran central
+        if (dialText && dialBadge) {
+            if (weightLeft === 0 && weightRight === 0) {
+                dialText.innerHTML = `Plateaux Vides (0 kg)`;
+                dialBadge.style.color = "#cbd5e1";
+            } else if (weightLeft === weightRight) {
+                dialText.innerHTML = `✨ <strong>Équilibre Parfait : ${weightLeft} kg = ${weightRight} kg</strong>`;
+                dialBadge.style.color = "#86efac";
+                dialBadge.style.borderColor = "#22c55e";
+            } else if (weightLeft > weightRight) {
+                dialText.innerHTML = `⚖️ Export Trop Lourd : Gauche ${weightLeft} kg > Droite ${weightRight} kg (Diff. -${weightLeft - weightRight} kg)`;
+                dialBadge.style.color = "#f59e0b";
+                dialBadge.style.borderColor = "rgba(245, 158, 11, 0.5)";
+            } else {
+                dialText.innerHTML = `⚖️ Import Trop Lourd : Gauche ${weightLeft} kg < Droite ${weightRight} kg (Diff. +${weightRight - weightLeft} kg)`;
+                dialBadge.style.color = "#38bdf8";
+                dialBadge.style.borderColor = "rgba(56, 189, 248, 0.5)";
+            }
+        }
+
+        // Rafraîchir les états d'entrepôt
+        this.tradeGoods.forEach(g => {
+            const card = document.getElementById(`item-card-${g.id}`);
+            if (card) {
+                const isLoaded = this.leftPanItems.includes(g.id) || this.rightPanItems.includes(g.id);
+                if (isLoaded) {
+                    card.classList.add("placed");
+                } else {
+                    card.classList.remove("placed");
+                }
+            }
+        });
+    }
+
+    autoBalanceTrade() {
+        this.leftPanItems = ["exp_ble_1", "exp_ble_2", "exp_poterie"];
+        this.rightPanItems = ["imp_metaux", "imp_lapis"];
+        if (window.soundEngine) {
+            window.soundEngine.playCoins();
+            window.soundEngine.playSuccess();
+        }
+        this.updateBalanceScaleDOM();
+        const fb = document.getElementById("trade-feedback-area");
+        if (fb) {
+            fb.innerHTML = `
+                <div class="formative-feedback feedback-hint">
+                    💡 <em>Cargaison équilibrée :</em> 20 kg de grains + 15 kg de poteries (35 kg d'exportations) équilibrent 20 kg de métaux + 15 kg de lapis-lazuli (35 kg d'importations).
+                </div>
+            `;
         }
     }
 
-    resetTrade() {
-        this.exportSlots.forEach(s => s.selected = false);
-        this.importSlots.forEach(s => s.selected = false);
+    resetTradeScale() {
+        this.leftPanItems = [];
+        this.rightPanItems = [];
         if (window.soundEngine) window.soundEngine.playChoice();
-        this.renderTradePuzzle();
+        this.updateBalanceScaleDOM();
+        const fb = document.getElementById("trade-feedback-area");
+        if (fb) fb.innerHTML = "";
     }
 
-    validateTrade() {
+    validateTradeScale() {
         const feedbackArea = document.getElementById("trade-feedback-area");
         if (!feedbackArea) return;
 
         this.attemptCounts["trade"] = (this.attemptCounts["trade"] || 0) + 1;
 
-        const selExports = this.exportSlots.filter(s => s.selected);
-        const selImports = this.importSlots.filter(s => s.selected);
+        const leftGoods = this.tradeGoods.filter(g => this.leftPanItems.includes(g.id));
+        const rightGoods = this.tradeGoods.filter(g => this.rightPanItems.includes(g.id));
 
-        if (selExports.length !== 2 || selImports.length !== 2) {
+        const weightLeft = leftGoods.reduce((sum, g) => sum + g.weight, 0);
+        const weightRight = rightGoods.reduce((sum, g) => sum + g.weight, 0);
+
+        const hasCedarIntruder = this.leftPanItems.includes("exp_cedre_intrus");
+        const hasClayIntruder = this.rightPanItems.includes("imp_argile_intrus");
+
+        if (hasCedarIntruder) {
+            feedbackArea.innerHTML = `
+                <div class="formative-feedback feedback-error">
+                    ⚠️ <strong>Erreur Historique : Le Bois de Cèdre est un intrus à l'exportation !</strong>
+                    Le désert mésopotamien était dépourvu de forêts d'arbres droits. Le cèdre devait être <em>importé</em> du Liban pour bâtir les toits des temples.
+                </div>
+            `;
+            if (window.soundEngine) window.soundEngine.playChoice();
+            return;
+        }
+
+        if (hasClayIntruder) {
+            feedbackArea.innerHTML = `
+                <div class="formative-feedback feedback-error">
+                    ⚠️ <strong>Erreur Historique : L'Argile est un intrus à l'importation !</strong>
+                    L'argile fluviale était disponible à volonté sur les berges du Tigre et de l'Euphrate. Les marchands d'Ur n'en importaient jamais !
+                </div>
+            `;
+            if (window.soundEngine) window.soundEngine.playChoice();
+            return;
+        }
+
+        if (weightLeft === 0 || weightRight === 0) {
             feedbackArea.innerHTML = `
                 <div class="formative-feedback feedback-hint">
-                    ℹ️ Veuillez sélectionner exactement <strong>2 produits exportés</strong> et <strong>2 produits importés</strong> pour équilibrer la balance commerciale.
+                    ℹ️ Veuillez charger à la fois le <strong>Plateau Gauche</strong> (produits exportés) et le <strong>Plateau Droit</strong> (ressources importées) pour négocier.
                 </div>
             `;
             return;
         }
 
-        const exportsCorrect = this.exportSlots.find(s => s.id === "exp_ble").selected &&
-                               this.exportSlots.find(s => s.id === "exp_poterie").selected;
-
-        const importsCorrect = this.importSlots.find(s => s.id === "imp_pierres").selected &&
-                               this.importSlots.find(s => s.id === "imp_metaux").selected;
-
-        if (exportsCorrect && importsCorrect) {
+        if (weightLeft === 35 && weightRight === 35 && !hasCedarIntruder && !hasClayIntruder) {
             feedbackArea.innerHTML = `
                 <div class="formative-feedback feedback-success">
-                    ✨ <strong>Balance Commerciale Équilibrée !</strong> Vos surplus de blé et poteries ont été troqués avec succès contre les métaux, le bois précieux et les pierres précieuses indispensables !
+                    ✨ <strong>Équilibre Parfait de la Balance Commerciale (35 kg = 35 kg) !</strong>
+                    Vos surplus agricoles et vos céramiques fines compensent exactement la valeur des métaux et du lapis-lazuli.
                 </div>
             `;
             if (window.soundEngine) {
@@ -941,41 +1532,233 @@ class MiniGamesManager {
                 window.soundEngine.playSuccess();
             }
 
+            // Déclencher la phase gestuelle du sceau-cylindre
             setTimeout(() => {
-                this.renderSynthesis(
-                    "Le Commerce de Troc, les Échanges & les Surplus",
-                    "🏺",
-                    [
-                        { title: "1. Le Troc en l'Absence de Monnaie", desc: "Les échanges commerciaux reposaient sur le troc direct de denrées et la rédaction de contrats officiels en argile scellés." },
-                        { title: "2. Les Produits Exportés (Mésopotamie)", desc: "Blé, orge, poteries et céramiques d'art, produits en abondance grâce à l'agriculture irriguée et l'argile des rives." },
-                        { title: "3. Les Produits Importés", desc: "Bois de construction (cèdre), métaux pour le bronze (cuivre, étain) et pierres précieuses (lapis-lazuli) absents du territoire." },
-                        { title: "4. Rôle Clé de l'Écriture Commerciale", desc: "Conserver des traces vérifiables des transactions, dettes et accords marchands à travers tout le Proche-Orient." }
-                    ]
-                );
-            }, 1800);
+                this.renderCylinderSealWorkshop();
+            }, 1200);
         } else {
+            const diff = Math.abs(weightRight - weightLeft);
+            let hint = `La balance est déséquilibrée de ${diff} kg.`;
             if (this.attemptCounts["trade"] >= 2) {
-                feedbackArea.innerHTML = `
-                    <div class="formative-feedback feedback-hint">
-                        💡 <strong>Indice du Négociant :</strong> La Mésopotamie produit et exporte le <em>Blé</em> et les <em>Poteries</em> (argile locale), et doit importer les <em>Métaux/Bois</em> et les <em>Pierres Précieuses</em>.
-                    </div>
-                `;
-            } else {
-                let errorMsg = "La sélection des marchandises contient des confusions entre importations et exportations.";
-                if (!exportsCorrect) {
-                    errorMsg = "La Mésopotamie n'avait pas de forêts denses : le bois ne pouvait pas être un produit exporté, mais une ressource rare à importer !";
-                } else if (!importsCorrect) {
-                    errorMsg = "L'argile est omniprésente sur les rives du Tigre et de l'Euphrate, la cité n'avait nullement besoin d'en importer !";
-                }
-
-                feedbackArea.innerHTML = `
-                    <div class="formative-feedback feedback-error">
-                        <span>💡 <strong>Indice Pédagogique :</strong> ${errorMsg} Réajustez vos choix de cargaison.</span>
-                    </div>
-                `;
+                hint = `<strong>Indice :</strong> Chargez les 2 sacs de grains (10+10 kg) et la poterie (15 kg) à gauche (total 35 kg), puis les métaux (20 kg) et le lapis-lazuli (15 kg) à droite (total 35 kg).`;
             }
+            feedbackArea.innerHTML = `
+                <div class="formative-feedback feedback-error">
+                    <span>⚖️ <strong>Déséquilibre :</strong> ${hint} Retirez ou ajoutez des marchandises pour atteindre l'équivalence.</span>
+                </div>
+            `;
             if (window.soundEngine) window.soundEngine.playChoice();
         }
+    }
+
+    // =========================================================================
+    // ÉTAPE TACTILE GESTUELLE : RATIFICATION AU SCEAU-CYLINDRE
+    // =========================================================================
+    renderCylinderSealWorkshop() {
+        const container = document.getElementById("seal-workshop-container");
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="cylinder-seal-workshop">
+                <div class="pan-header" style="color:#f59e0b; justify-content:center; font-size:1.2rem;">
+                    <span>📜 Ratification Officielle : Déroulez le Sceau-Cylindre</span>
+                </div>
+                <p style="font-size:0.9rem; line-height:1.5; color:#cbd5e1; max-width:650px; margin:8px auto 14px;">
+                    En Mésopotamie, pour donner force de loi à un accord de troc, les négociants faisaient
+                    <strong>rouler un sceau-cylindre en pierre gravée</strong> sur une bande d'argile encore fraîche.
+                    L'empreinte continue en bas-relief garantissait l'authenticité infalsifiable de la transaction.
+                </p>
+
+                <div class="clay-frieze-strip-box">
+                    <canvas id="seal-frieze-canvas" width="560" height="120" class="clay-frieze-canvas"></canvas>
+                </div>
+
+                <div class="seal-slider-control">
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#fde047; margin-bottom:6px;">
+                        <span>🏺 Cylindre au point de départ</span>
+                        <span id="seal-roll-pct">Progression : 0%</span>
+                        <span>Sceau imprimé ➔</span>
+                    </div>
+                    <input type="range" id="seal-roll-slider" min="0" max="100" value="0" style="width:100%; cursor:pointer;">
+                </div>
+
+                <div id="seal-success-msg" style="margin-top:14px;"></div>
+            </div>
+        `;
+
+        this.initSealCanvas();
+    }
+
+    initSealCanvas() {
+        const canvas = document.getElementById("seal-frieze-canvas");
+        const slider = document.getElementById("seal-roll-slider");
+        const pctLabel = document.getElementById("seal-roll-pct");
+        if (!canvas || !slider) return;
+
+        const ctx = canvas.getContext("2d");
+        this.sealCanvas = canvas;
+        this.sealCtx = ctx;
+        this.sealProgress = 0;
+
+        this.drawSealFrieze(0);
+
+        slider.oninput = (e) => {
+            const val = parseInt(e.target.value, 10);
+            this.sealProgress = val;
+            if (pctLabel) pctLabel.innerText = `Progression : ${val}%`;
+            this.drawSealFrieze(val / 100);
+
+            if (val > 0 && val % 20 === 0 && window.soundEngine) {
+                window.soundEngine.playSealRoll();
+            }
+
+            if (val >= 100) {
+                this.finishSealRolling();
+            }
+        };
+    }
+
+    drawSealFrieze(progress) {
+        if (!this.sealCanvas || !this.sealCtx) return;
+        const ctx = this.sealCtx;
+        const w = this.sealCanvas.width;
+        const h = this.sealCanvas.height;
+
+        // Bande d'argile humide
+        ctx.fillStyle = "#78350f";
+        ctx.fillRect(0, 0, w, h);
+
+        // Texture d'argile
+        ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+        for (let i = 0; i < 30; i++) {
+            ctx.fillRect((i * 41) % w, (i * 29) % h, 3, 2);
+        }
+
+        // Zone imprimée par le rouleau
+        const rolledWidth = w * progress;
+        if (rolledWidth > 0) {
+            ctx.save();
+            const imprintedGrad = ctx.createLinearGradient(0, 0, 0, h);
+            imprintedGrad.addColorStop(0, "#92400e");
+            imprintedGrad.addColorStop(0.5, "#b45309");
+            imprintedGrad.addColorStop(1, "#542508");
+            ctx.fillStyle = imprintedGrad;
+            ctx.fillRect(0, 10, rolledWidth, h - 20);
+
+            // Frise en bas-relief (motifs mésopotamiens répétés)
+            ctx.strokeStyle = "#fde047";
+            ctx.fillStyle = "#fef08a";
+            ctx.lineWidth = 2;
+
+            const segmentW = 140;
+            const segments = Math.ceil(rolledWidth / segmentW);
+
+            for (let s = 0; s < segments; s++) {
+                const sx = s * segmentW;
+                if (sx < rolledWidth) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(0, 0, rolledWidth, h);
+                    ctx.clip();
+
+                    // 1. Étoile d'Ishtar / Ciel
+                    ctx.font = "24px sans-serif";
+                    ctx.fillText("𒀭", sx + 20, 48);
+
+                    // 2. Taureau ailé / Épi de blé
+                    ctx.fillText("🌾", sx + 60, 52);
+                    ctx.fillText("🐂", sx + 95, 52);
+
+                    // 3. Vagues du Tigre et de l'Euphrate
+                    ctx.beginPath();
+                    ctx.strokeStyle = "rgba(253, 224, 71, 0.6)";
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(sx + 10, 85);
+                    ctx.bezierCurveTo(sx + 35, 75, sx + 55, 95, sx + 80, 85);
+                    ctx.bezierCurveTo(sx + 105, 75, sx + 125, 95, sx + 140, 85);
+                    ctx.stroke();
+
+                    // 4. Inscription cunéiforme du contrat
+                    ctx.font = "12px monospace";
+                    ctx.fillStyle = "#fef08a";
+                    ctx.fillText("𒁹 𒀭 𒂗 𒆠", sx + 30, 104);
+
+                    ctx.restore();
+                }
+            }
+            ctx.restore();
+        }
+
+        // Le cylindre lui-même (roulant au front d'avancement)
+        if (progress < 1) {
+            const cx = Math.max(16, Math.min(w - 16, rolledWidth));
+            ctx.save();
+            const cylinderGrad = ctx.createLinearGradient(cx - 14, 0, cx + 14, 0);
+            cylinderGrad.addColorStop(0, "#1e293b");
+            cylinderGrad.addColorStop(0.3, "#64748b");
+            cylinderGrad.addColorStop(0.7, "#94a3b8");
+            cylinderGrad.addColorStop(1, "#0f172a");
+            ctx.fillStyle = cylinderGrad;
+            ctx.strokeStyle = "#d4af37";
+            ctx.lineWidth = 2;
+
+            ctx.fillRect(cx - 14, 5, 28, h - 10);
+            ctx.strokeRect(cx - 14, 5, 28, h - 10);
+
+            // Gravures en creux sur le cylindre de pierre
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(cx - 8, 25, 16, 4);
+            ctx.fillRect(cx - 10, 55, 20, 4);
+            ctx.fillRect(cx - 6, 85, 12, 4);
+            ctx.restore();
+        }
+    }
+
+    finishSealRolling() {
+        if (this.sealFinished) return;
+        this.sealFinished = true;
+
+        if (window.soundEngine) {
+            window.soundEngine.playSealRoll();
+            window.soundEngine.playSuccess();
+        }
+
+        // Déverrouillage de l'artefact sceau-cylindre et de la médaille
+        if (window.gameEngine) {
+            window.gameEngine.unlockArtifact("sceau_cylindre");
+            window.gameEngine.unlockMedal("trade_baron");
+        }
+
+        const msgBox = document.getElementById("seal-success-msg");
+        if (msgBox) {
+            msgBox.innerHTML = `
+                <div class="formative-feedback feedback-success" style="animation: inspectorPop 0.4s ease-out;">
+                    <div style="font-size:1.05rem; margin-bottom:6px;">
+                        ✨ <strong>Contrat Ratifié & Gravé dans l'Argile !</strong>
+                    </div>
+                    <p style="margin:0 0 10px; line-height:1.5;">
+                        Le sceau-cylindre a déroulé son motif protecteur. L'accord commercial d'Ur est scellé pour l'éternité !
+                        Le <strong>Sceau-Cylindre Royal</strong> a été déposé dans votre <strong>Sacoche d'Artefacts</strong>.
+                    </p>
+                    <button class="btn-primary-start" style="padding:10px 24px; font-size:0.95rem;" onclick="window.minigames.proceedToTradeSynthesis()">
+                        Consulter la Synthèse sur le Troc & les Échanges ➔
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    proceedToTradeSynthesis() {
+        this.renderSynthesis(
+            "Le Commerce de Troc, les Échanges & les Surplus",
+            "🏺",
+            [
+                { title: "1. Le Troc en l'Absence de Monnaie", desc: "Les échanges commerciaux reposaient sur le troc direct de denrées pesées au trébuchet et la rédaction de contrats officiels en argile scellés." },
+                { title: "2. Les Produits Exportés (Mésopotamie)", desc: "Blé, orge, poteries et céramiques d'art, produits en abondance grâce à l'agriculture irriguée et l'argile des rives." },
+                { title: "3. Les Produits Importés", desc: "Bois de construction (cèdre), métaux pour le bronze (cuivre, étain) et pierres précieuses (lapis-lazuli) absents du territoire." },
+                { title: "4. Rôle Clé de l'Écriture Commerciale", desc: "Conserver des traces vérifiables des transactions, dettes et accords marchands à travers tout le Proche-Orient." }
+            ]
+        );
     }
 
     // =========================================================================
@@ -985,7 +1768,10 @@ class MiniGamesManager {
         this.onCompleteCallback = onComplete;
         this.currentMinigame = "ziggurat";
         if (!this.attemptCounts["ziggurat"]) this.attemptCounts["ziggurat"] = 0;
-        this.zigguratPlaced = [];
+        this.zigguratSlots = [null, null, null, null, null];
+        this.selectedZigguratSlotIndex = null;
+        this.selectedZigguratCardId = null;
+        this.zigguratDragData = null;
 
         this.zigguratTiers = [
             { tier: 1, name: "1. Le Roi", icon: "👑", desc: "Pouvoir absolu, commande l'armée, promulgue les lois et perçoit les taxes." },
@@ -1011,6 +1797,8 @@ class MiniGamesManager {
         const container = document.getElementById("minigame-content");
         if (!container) return;
 
+        const placedCount = this.zigguratSlots.filter(id => id !== null).length;
+
         container.innerHTML = `
             <div class="minigame-header">
                 <div>
@@ -1022,21 +1810,61 @@ class MiniGamesManager {
 
             <p class="minigame-instructions">
                 La société mésopotamienne est hiérarchisée en <strong>5 niveaux stricts</strong> selon la <em>naissance</em> et la <em>spécialisation du travail</em>.
-                Reconstituez la Ziggourat en plaçant les classes sociales dans l'ordre hiérarchique, <strong>du sommet suprême (Niveau 1) jusqu'à la base (Niveau 5)</strong>.
+                Reconstituez la Ziggourat en <strong>glissant-déposant</strong> chaque classe sociale sur son étage, <strong>du sommet suprême (Niveau 1) jusqu'à la base (Niveau 5)</strong>.
+                <em>💡 Astuce : En cas d'erreur, glissez un étage sur un autre pour les échanger, ou cliquez sur ✕ pour libérer la place !</em>
             </p>
 
             <div class="ziggurat-structure-view">
-                <div class="ziggurat-pyramid-container">
-                    ${this.zigguratTiers.map(t => {
-                        const isPlaced = this.zigguratPlaced.includes(t.tier);
+                <div style="font-family:var(--font-title); color:var(--gold-light); margin-bottom:12px; font-size:1.05rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🏛️ Étages de la Ziggourat (Glissez-déposez ici) :</span>
+                    <span style="font-size:0.85rem; color:#d4af37;">${placedCount} / 5 étages bâtis</span>
+                </div>
+
+                <div class="ziggurat-pyramid-container ziggurat-tiers-wrapper" id="ziggurat-tiers-container">
+                    ${this.zigguratTiers.map((t, slotIdx) => {
+                        const filledClassId = this.zigguratSlots[slotIdx];
+                        const classInfo = filledClassId ? this.zigguratTiers.find(item => item.tier === filledClassId) : null;
+                        const isSlotSelected = this.selectedZigguratSlotIndex === slotIdx;
+                        const isTargetWaiting = this.selectedZigguratCardId !== null && !filledClassId;
+
+                        let tierClasses = `ziggurat-tier tier-${t.tier}`;
+                        if (filledClassId) tierClasses += " placed";
+                        else tierClasses += " empty";
+                        if (isSlotSelected) tierClasses += " slot-selected";
+                        if (isTargetWaiting) tierClasses += " slot-can-drop";
+
                         return `
-                            <div class="ziggurat-tier tier-${t.tier} ${isPlaced ? 'placed' : 'empty'}">
-                                <div class="tier-header">
-                                    <span>${t.icon}</span>
-                                    <span class="tier-label">Niveau ${t.tier} : ${isPlaced ? t.name : 'Étage Vacant'}</span>
+                            <div class="${tierClasses}"
+                                 id="ziggurat-tier-slot-${slotIdx}"
+                                 draggable="${filledClassId !== null}"
+                                 ondragstart="window.minigames.handleZigguratDragStart(event, 'tier', ${slotIdx})"
+                                 ondragover="window.minigames.handleZigguratDragOver(event)"
+                                 ondragleave="window.minigames.handleZigguratDragLeave(event)"
+                                 ondrop="window.minigames.handleZigguratDropOnTier(event, ${slotIdx})"
+                                 onclick="window.minigames.handleZigguratSlotClick(${slotIdx})"
+                                 title="${filledClassId ? 'Glisser pour déplacer/échanger ou cliquer' : 'Déposer ici une classe sociale'}">
+                                <div class="tier-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:8px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-size:1.25rem;">${classInfo ? classInfo.icon : t.icon}</span>
+                                        <span class="tier-label">Niveau ${t.tier} : ${classInfo ? classInfo.name : 'Étage Vacant'}</span>
+                                    </div>
+                                    ${filledClassId ? `
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span style="font-size:0.75rem; color:#f7e089; opacity:0.85; user-select:none;">✥ Glisser</span>
+                                            <button class="slot-remove-btn" title="Retirer de cet étage" onclick="event.stopPropagation(); window.minigames.removeZigguratSlot(${slotIdx})">✕</button>
+                                        </div>
+                                    ` : `
+                                        <span style="font-size:0.75rem; color:#94a3b8; font-style:italic;">${isTargetWaiting ? '⬇️ Déposer ici' : 'Vacant'}</span>
+                                    `}
                                 </div>
-                                <div class="tier-content">
-                                    ${isPlaced ? `<span style="font-size:0.8rem; color:#cbd5e1;">${t.desc}</span>` : '<span style="font-size:0.8rem; color:#888;">En attente de placement...</span>'}
+                                <div class="tier-content" style="width:100%; margin-top:4px;">
+                                    ${classInfo ? `
+                                        <span style="font-size:0.82rem; color:#cbd5e1; line-height:1.35; display:block;">${classInfo.desc}</span>
+                                    ` : `
+                                        <span style="font-size:0.78rem; color:#888; font-style:italic; display:block;">
+                                            ${isTargetWaiting ? '👉 Cliquez ou glissez la classe sélectionnée ici' : 'Glissez-déposez la classe sociale correspondant à cet étage'}
+                                        </span>
+                                    `}
                                 </div>
                             </div>
                         `;
@@ -1044,24 +1872,45 @@ class MiniGamesManager {
                 </div>
             </div>
 
-            <h4 style="color:var(--gold-light); margin-bottom:10px;">Groupes Sociaux à Placer (Cliquez dans l'ordre du sommet à la base) :</h4>
-            <div class="cards-pool" id="ziggurat-cards-pool">
-                ${this.socialClassesPool.map(card => {
-                    const isUsed = this.zigguratPlaced.includes(card.id);
-                    return `
-                        <button class="draggable-item ${isUsed ? 'used' : ''}" 
-                                ${isUsed ? 'disabled' : ''} 
-                                onclick="window.minigames.pickZigguratTier(${card.id})">
-                            <span>🏛️</span>
-                            <span>${card.label}</span>
-                        </button>
-                    `;
-                }).join('')}
+            <div style="margin-top:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                    <h4 style="color:var(--gold-light); margin:0;">Groupes Sociaux Disponibles (Glissez vers un étage ou cliquez) :</h4>
+                    ${this.selectedZigguratCardId ? `<span style="font-size:0.85rem; color:#93c5fd;">👉 Carte sélectionnée : cliquez sur un étage pour la déposer</span>` : ''}
+                    ${this.selectedZigguratSlotIndex !== null ? `<span style="font-size:0.85rem; color:#fde047;">👉 Étage sélectionné : cliquez sur un autre étage pour échanger</span>` : ''}
+                </div>
+
+                <div class="cards-pool" id="ziggurat-cards-pool"
+                     ondragover="window.minigames.handleZigguratDragOver(event)"
+                     ondragleave="window.minigames.handleZigguratDragLeave(event)"
+                     ondrop="window.minigames.handleZigguratDropOnPool(event)"
+                     title="Zone de réserve (vous pouvez y redéposer un étage pour le libérer)">
+                    ${this.socialClassesPool.map(card => {
+                        const isUsed = this.zigguratSlots.includes(card.id);
+                        const isSelected = this.selectedZigguratCardId === card.id;
+
+                        let cardClasses = "draggable-item";
+                        if (isUsed) cardClasses += " used";
+                        if (isSelected) cardClasses += " card-selected";
+
+                        return `
+                            <button class="${cardClasses}" 
+                                    ${isUsed ? 'disabled' : ''} 
+                                    draggable="${!isUsed}"
+                                    ondragstart="window.minigames.handleZigguratDragStart(event, 'pool', ${card.id})"
+                                    onclick="window.minigames.handleZigguratCardClick(${card.id})"
+                                    title="${isUsed ? 'Déjà placée sur la Ziggourat' : 'Glisser sur un étage ou cliquer pour sélectionner'}">
+                                <span>🏛️</span>
+                                <span>${card.label}</span>
+                                ${isUsed ? `<span style="margin-left:auto; font-size:0.72rem; color:#86efac;">(Sur la Ziggourat)</span>` : `<span style="margin-left:auto; font-size:0.72rem; color:#93c5fd;">(Glisser ✥)</span>`}
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
             </div>
 
             <div id="ziggurat-feedback-area"></div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
                 <button class="hud-btn" onclick="window.minigames.resetZiggurat()">🔄 Recommencer l'Édification</button>
                 <button class="btn-primary-start" style="padding:10px 24px;" onclick="window.minigames.validateZiggurat()">
                     Bénir la Ziggourat au Panthéon
@@ -1070,17 +1919,205 @@ class MiniGamesManager {
         `;
     }
 
-    pickZigguratTier(classId) {
-        if (this.zigguratPlaced.includes(classId)) return;
-        if (this.zigguratPlaced.length >= 5) return;
+    handleZigguratDragStart(event, sourceType, idOrIndex) {
+        this.zigguratDragData = { sourceType, value: idOrIndex };
+        if (event && event.dataTransfer) {
+            event.dataTransfer.setData("text/plain", JSON.stringify(this.zigguratDragData));
+            event.dataTransfer.effectAllowed = "move";
+        }
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add("dragging");
+        }
+    }
 
-        this.zigguratPlaced.push(classId);
-        if (window.soundEngine) window.soundEngine.playChisel();
+    handleZigguratDragOver(event) {
+        if (event) {
+            event.preventDefault();
+            if (event.dataTransfer) {
+                event.dataTransfer.dropEffect = "move";
+            }
+            const tierEl = event.currentTarget.closest(".ziggurat-tier");
+            if (tierEl) {
+                tierEl.classList.add("drag-over");
+            } else if (event.currentTarget.id === "ziggurat-cards-pool") {
+                event.currentTarget.classList.add("pool-drag-over");
+            }
+        }
+    }
+
+    handleZigguratDragLeave(event) {
+        if (event) {
+            const tierEl = event.currentTarget.closest(".ziggurat-tier");
+            if (tierEl) {
+                tierEl.classList.remove("drag-over");
+            } else if (event.currentTarget.id === "ziggurat-cards-pool") {
+                event.currentTarget.classList.remove("pool-drag-over");
+            }
+        }
+    }
+
+    handleZigguratDropOnTier(event, targetSlotIndex) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const tierEl = event.currentTarget.closest(".ziggurat-tier");
+            if (tierEl) tierEl.classList.remove("drag-over");
+        }
+
+        let dragData = this.zigguratDragData;
+        if ((!dragData || !dragData.sourceType) && event && event.dataTransfer) {
+            try {
+                const raw = event.dataTransfer.getData("text/plain");
+                if (raw) dragData = JSON.parse(raw);
+            } catch (e) {}
+        }
+
+        if (!dragData) return;
+
+        if (dragData.sourceType === "pool") {
+            const cardId = dragData.value;
+            const targetCurrent = this.zigguratSlots[targetSlotIndex];
+            const prevSlot = this.zigguratSlots.indexOf(cardId);
+
+            if (prevSlot !== -1) {
+                this.zigguratSlots[prevSlot] = targetCurrent;
+            }
+            this.zigguratSlots[targetSlotIndex] = cardId;
+            this.selectedZigguratCardId = null;
+            this.selectedZigguratSlotIndex = null;
+            if (window.soundEngine) window.soundEngine.playChisel();
+        } else if (dragData.sourceType === "tier") {
+            const sourceSlotIndex = dragData.value;
+            if (sourceSlotIndex !== targetSlotIndex) {
+                // Échange (SWAP) entre deux étages
+                const temp = this.zigguratSlots[targetSlotIndex];
+                this.zigguratSlots[targetSlotIndex] = this.zigguratSlots[sourceSlotIndex];
+                this.zigguratSlots[sourceSlotIndex] = temp;
+                this.selectedZigguratCardId = null;
+                this.selectedZigguratSlotIndex = null;
+                if (window.soundEngine) window.soundEngine.playChisel();
+            }
+        }
+
+        this.zigguratDragData = null;
         this.renderZigguratPuzzle();
     }
 
+    handleZigguratDropOnPool(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove("pool-drag-over");
+        }
+
+        let dragData = this.zigguratDragData;
+        if ((!dragData || !dragData.sourceType) && event && event.dataTransfer) {
+            try {
+                const raw = event.dataTransfer.getData("text/plain");
+                if (raw) dragData = JSON.parse(raw);
+            } catch (e) {}
+        }
+
+        if (dragData && dragData.sourceType === "tier") {
+            const sourceSlotIndex = dragData.value;
+            this.zigguratSlots[sourceSlotIndex] = null;
+            this.selectedZigguratSlotIndex = null;
+            if (window.soundEngine) window.soundEngine.playChoice();
+        }
+
+        this.zigguratDragData = null;
+        this.renderZigguratPuzzle();
+    }
+
+    removeZigguratSlot(slotIndex) {
+        if (this.zigguratSlots[slotIndex] !== null) {
+            this.zigguratSlots[slotIndex] = null;
+            if (this.selectedZigguratSlotIndex === slotIndex) {
+                this.selectedZigguratSlotIndex = null;
+            }
+            if (window.soundEngine) window.soundEngine.playChoice();
+            this.renderZigguratPuzzle();
+        }
+    }
+
+    handleZigguratCardClick(cardId) {
+        if (this.zigguratSlots.includes(cardId)) return;
+
+        // Si un étage était sélectionné, déposer directement la carte dedans
+        if (this.selectedZigguratSlotIndex !== null) {
+            const currentInSlot = this.zigguratSlots[this.selectedZigguratSlotIndex];
+            this.zigguratSlots[this.selectedZigguratSlotIndex] = cardId;
+            this.selectedZigguratSlotIndex = null;
+            this.selectedZigguratCardId = null;
+            if (window.soundEngine) window.soundEngine.playChisel();
+            this.renderZigguratPuzzle();
+            return;
+        }
+
+        // Sinon, remplir le premier étage vacant
+        const firstEmptyIndex = this.zigguratSlots.findIndex(id => id === null);
+        if (firstEmptyIndex !== -1) {
+            this.zigguratSlots[firstEmptyIndex] = cardId;
+            this.selectedZigguratCardId = null;
+            if (window.soundEngine) window.soundEngine.playChisel();
+            this.renderZigguratPuzzle();
+        } else {
+            // Sélectionner la carte pour la déposer manuellement
+            this.selectedZigguratCardId = (this.selectedZigguratCardId === cardId) ? null : cardId;
+            if (window.soundEngine) window.soundEngine.playChoice();
+            this.renderZigguratPuzzle();
+        }
+    }
+
+    handleZigguratSlotClick(slotIdx) {
+        const currentInSlot = this.zigguratSlots[slotIdx];
+
+        // 1. Si une carte était sélectionnée dans la réserve
+        if (this.selectedZigguratCardId !== null) {
+            const prevSlot = this.zigguratSlots.indexOf(this.selectedZigguratCardId);
+            if (prevSlot !== -1) {
+                this.zigguratSlots[prevSlot] = currentInSlot;
+            }
+            this.zigguratSlots[slotIdx] = this.selectedZigguratCardId;
+            this.selectedZigguratCardId = null;
+            this.selectedZigguratSlotIndex = null;
+            if (window.soundEngine) window.soundEngine.playChisel();
+            this.renderZigguratPuzzle();
+            return;
+        }
+
+        // 2. Si un autre étage était déjà sélectionné : ÉCHANGE (SWAP)
+        if (this.selectedZigguratSlotIndex !== null) {
+            if (this.selectedZigguratSlotIndex === slotIdx) {
+                this.selectedZigguratSlotIndex = null;
+            } else {
+                const temp = this.zigguratSlots[slotIdx];
+                this.zigguratSlots[slotIdx] = this.zigguratSlots[this.selectedZigguratSlotIndex];
+                this.zigguratSlots[this.selectedZigguratSlotIndex] = temp;
+                this.selectedZigguratSlotIndex = null;
+                if (window.soundEngine) window.soundEngine.playChisel();
+            }
+            this.renderZigguratPuzzle();
+            return;
+        }
+
+        // 3. Sélectionner l'étage actuel s'il contient une classe
+        if (currentInSlot !== null) {
+            this.selectedZigguratSlotIndex = slotIdx;
+            if (window.soundEngine) window.soundEngine.playChoice();
+            this.renderZigguratPuzzle();
+        }
+    }
+
+    pickZigguratTier(classId) {
+        this.handleZigguratCardClick(classId);
+    }
+
     resetZiggurat() {
-        this.zigguratPlaced = [];
+        this.zigguratSlots = [null, null, null, null, null];
+        this.selectedZigguratSlotIndex = null;
+        this.selectedZigguratCardId = null;
+        this.zigguratDragData = null;
         if (window.soundEngine) window.soundEngine.playChoice();
         this.renderZigguratPuzzle();
     }
@@ -1089,10 +2126,11 @@ class MiniGamesManager {
         const feedbackArea = document.getElementById("ziggurat-feedback-area");
         if (!feedbackArea) return;
 
-        if (this.zigguratPlaced.length < 5) {
+        const placedCount = this.zigguratSlots.filter(id => id !== null).length;
+        if (placedCount < 5) {
             feedbackArea.innerHTML = `
                 <div class="formative-feedback feedback-hint">
-                    ℹ️ Veuillez placer les 5 étages de la société sur la Ziggourat avant de valider (${this.zigguratPlaced.length}/5 placés).
+                    ℹ️ Veuillez placer les 5 étages de la société sur la Ziggourat avant de valider (${placedCount}/5 placés).
                 </div>
             `;
             return;
@@ -1100,11 +2138,11 @@ class MiniGamesManager {
 
         this.attemptCounts["ziggurat"] = (this.attemptCounts["ziggurat"] || 0) + 1;
 
-        const isCorrect = this.zigguratPlaced[0] === 1 &&
-                          this.zigguratPlaced[1] === 2 &&
-                          this.zigguratPlaced[2] === 3 &&
-                          this.zigguratPlaced[3] === 4 &&
-                          this.zigguratPlaced[4] === 5;
+        const isCorrect = this.zigguratSlots[0] === 1 &&
+                          this.zigguratSlots[1] === 2 &&
+                          this.zigguratSlots[2] === 3 &&
+                          this.zigguratSlots[3] === 4 &&
+                          this.zigguratSlots[4] === 5;
 
         if (isCorrect) {
             feedbackArea.innerHTML = `
@@ -1133,13 +2171,13 @@ class MiniGamesManager {
             }, 1800);
         } else {
             let errorMsg = "La hiérarchie sociale comporte des erreurs de placement.";
-            if (this.zigguratPlaced[0] !== 1) {
+            if (this.zigguratSlots[0] !== 1) {
                 errorMsg = "Au sommet de la cité-État (Niveau 1) se trouve toujours le <strong>Roi</strong>, détenteur du pouvoir politique, militaire et religieux suprême !";
-            } else if (this.zigguratPlaced[1] !== 2) {
+            } else if (this.zigguratSlots[1] !== 2) {
                 errorMsg = "Au Niveau 2 se trouvent les <strong>Nobles</strong> (famille royale, hauts prêtres, conseillers) qui possèdent l'ensemble des terres.";
-            } else if (this.zigguratPlaced[2] !== 3) {
+            } else if (this.zigguratSlots[2] !== 3) {
                 errorMsg = "Au Niveau 3 se trouvent les <strong>Fonctionnaires & Scribes</strong>, dont la maîtrise de l'écriture les rend indispensables.";
-            } else if (this.zigguratPlaced[3] !== 4) {
+            } else if (this.zigguratSlots[3] !== 4) {
                 errorMsg = "Au Niveau 4 se trouve le <strong>Peuple libre</strong> (paysans, artisans, commerçants, éleveurs) qui produit les biens vitaux.";
             } else {
                 errorMsg = "Au Niveau 5 (à la base) se trouvent les <strong>Esclaves</strong>, qui n'ont aucun droit.";
@@ -1147,7 +2185,7 @@ class MiniGamesManager {
 
             let hintHtml = `
                 <div class="formative-feedback feedback-error">
-                    <span>💡 <strong>Indice Pédagogique (Tentative ${this.attemptCounts["ziggurat"]}) :</strong> ${errorMsg}</span>
+                    <span>💡 <strong>Indice Pédagogique (Tentative ${this.attemptCounts["ziggurat"]}) :</strong> ${errorMsg} Glissez un étage sur un autre pour échanger leurs positions ou retirez les erreurs avec ✕.</span>
             `;
 
             if (this.attemptCounts["ziggurat"] >= 2) {
@@ -1432,3 +2470,9 @@ class MiniGamesManager {
         }
     }
 }
+
+// =========================================================================
+// INSTANCIATION GLOBALE DU GESTIONNAIRE DES MINI-JEUX
+// =========================================================================
+window.minigames = new MiniGamesManager();
+

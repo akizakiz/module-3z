@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Les Chroniques du Croissant Fertile · Histoire 1re Secondaire (Québec) · Module 3</title>
+    <title>Les Chroniques du Croissant Fertile</title>
+    <meta name="description" content="Aventure historique interactive sur l'émergence de la civilisation mésopotamienne et les premières cités-États.">
+    <meta property="og:title" content="Les Chroniques du Croissant Fertile">
+    <meta property="og:description" content="Aventure historique interactive sur l'émergence de la civilisation mésopotamienne et les premières cités-États.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -82,9 +85,18 @@
 
             <!-- ACTIONS HUD -->
             <div class="hud-actions">
+                <button class="hud-btn hud-btn-save" id="btn-hud-save" title="Enregistrer ma partie sur mon MacBook (Disquette)" onclick="window.gameEngine.saveGameToFile()">
+                    <span>💾</span>
+                    <span class="hud-btn-text">Sauvegarder</span>
+                </button>
                 <button class="hud-btn" id="btn-medals" title="Voir les médailles et réussites">
                     <span>🏆</span>
                     <span class="hud-btn-text">Médailles</span>
+                </button>
+                <button class="hud-btn" id="btn-inventory" title="Ouvrir la Sacoche d'Artefacts Historiques" onclick="window.gameEngine.openInventoryModal()">
+                    <span>🏺</span>
+                    <span class="hud-btn-text">Sacoche</span>
+                    <span class="inventory-badge" id="hud-inventory-count" style="display: none;">0</span>
                 </button>
                 <button class="hud-btn" id="btn-codex" title="Consulter le grimoire du savoir historique">
                     <span>📜</span>
@@ -102,41 +114,96 @@
             </div>
         </header>
 
-        <!-- BARRE DE PROGRESSION GLOBALE DES 5 CHAPITRES -->
-        <div class="chapter-progress-container" id="chapter-progress-container" style="display: none;">
-            <div class="chapter-progress-bar">
-                <div class="ch-step active" data-step="1" id="ch-step-1">
-                    <span class="ch-num">I</span>
-                    <span class="ch-name">Origines</span>
-                </div>
-                <div class="ch-line"></div>
-                <div class="ch-step" data-step="2" id="ch-step-2">
-                    <span class="ch-num">II</span>
-                    <span class="ch-name">Cités-États</span>
-                </div>
-                <div class="ch-line"></div>
-                <div class="ch-step" data-step="3" id="ch-step-3">
-                    <span class="ch-num">III</span>
-                    <span class="ch-name">Ziggourat</span>
-                </div>
-                <div class="ch-line"></div>
-                <div class="ch-step" data-step="4" id="ch-step-4">
-                    <span class="ch-num">IV</span>
-                    <span class="ch-name">Babylone</span>
-                </div>
-                <div class="ch-line"></div>
-                <div class="ch-step" data-step="5" id="ch-step-5">
-                    <span class="ch-num">V</span>
-                    <span class="ch-name">Le Nil</span>
-                </div>
-            </div>
-        </div>
+        <!-- ANCIENNE BARRE SUPPRIMÉE DU HUD : REMPLACÉE PAR LE CARTOUCHE / SCEAU ANTIQUE INTÉGRÉ DANS LA SCÈNE -->
+        <div class="chapter-progress-container" id="chapter-progress-container" style="display: none !important;" aria-hidden="true"></div>
 
         <!-- ZONE D'AFFICHAGE PRINCIPALE -->
         <main class="screen-container">
             
-            <!-- ÉCRAN D'ACCUEIL & SÉLECTION DE CLASSE -->
-            <section class="start-screen" id="start-screen">
+            <!-- ÉCRAN DU MENU PRINCIPAL -->
+            <section class="main-menu-screen" id="main-menu-screen">
+                <div class="main-menu-card">
+                    
+                    <!-- VERSION 2 AVEC EFFET SPÉCIAL CAPTANT L'ŒIL -->
+                    <div class="menu-version-badge" id="menu-version-badge">
+                        <span class="version-sparkle">✦</span>
+                        <span class="version-title-text">VERSION 2</span>
+                        <span class="version-sparkle">✦</span>
+                    </div>
+
+                    <!-- TITRE ET SOUS-TITRE DU JEU -->
+                    <div class="game-logo-container main-menu-logo">
+                        <h1 class="game-title main-title-glow">Les Chroniques du Croissant Fertile</h1>
+                        <div class="game-subtitle">L'Émergence d'une Civilisation</div>
+                        <div class="curriculum-badge">Histoire • 1re Secondaire (Québec) • Module 3</div>
+                    </div>
+
+                    <!-- MENTION AUTEUR AVEC EFFET SPÉCIAL CAPTANT L'ŒIL -->
+                    <div class="author-credits-badge" id="author-credits-badge">
+                        <span class="author-star">✧</span>
+                        <span class="author-glow-text">Programmé par Philippe Lévesque, M.Éd.</span>
+                        <span class="author-star">✧</span>
+                    </div>
+
+                    <p class="main-menu-intro-description">
+                        Voyagez au IVe millénaire av. J.-C. entre le Tigre, l'Euphrate et le Nil. Prenez des décisions historiques, maîtrisez la naissance de l'écriture cunéiforme et des hiéroglyphes, et découvrez l'organisation des premières cités-États.
+                    </p>
+
+                    <!-- BOUTONS D'ACTION DU MENU PRINCIPAL -->
+                    <div class="main-menu-actions">
+                        <button class="menu-action-btn menu-btn-primary" id="btn-menu-new-game" onclick="window.gameEngine.showClassSelection()">
+                            <span class="menu-btn-icon">⚔️</span>
+                            <div class="menu-btn-content">
+                                <span class="menu-btn-title">Nouvelle Partie</span>
+                                <span class="menu-btn-desc">Choisir un archétype et débuter l'aventure</span>
+                            </div>
+                            <span class="menu-btn-arrow">➔</span>
+                        </button>
+
+                        <button class="menu-action-btn menu-btn-load" id="btn-menu-load-game" onclick="window.gameEngine.openLoadGameModal()">
+                            <span class="menu-btn-icon">📂</span>
+                            <div class="menu-btn-content">
+                                <span class="menu-btn-title">Charger une Partie</span>
+                                <span class="menu-btn-desc">Fichier (.json) du MacBook ou sauvegarde locale</span>
+                            </div>
+                            <span class="menu-btn-arrow">➔</span>
+                        </button>
+
+                        <button class="menu-action-btn menu-btn-tutorial" id="btn-menu-tutorial" onclick="window.gameEngine.openTutorialModal()">
+                            <span class="menu-btn-icon">📖</span>
+                            <div class="menu-btn-content">
+                                <span class="menu-btn-title">Comment Jouer ?</span>
+                                <span class="menu-btn-desc">Tutoriel illustré, touches & fonctionnement</span>
+                            </div>
+                            <span class="menu-btn-arrow">➔</span>
+                        </button>
+                    </div>
+
+                    <!-- BANNIÈRE DE REPRISE DIRECTE RAPIDE SI SAUVEGARDE PRÉSENTE -->
+                    <div class="menu-quick-resume" id="menu-quick-resume" style="display: none;">
+                        <div class="quick-resume-left">
+                            <span class="quick-resume-icon">💾</span>
+                            <div class="quick-resume-texts">
+                                <strong>Dernière session enregistrée :</strong>
+                                <span id="menu-quick-resume-info" class="quick-resume-sub">Partie en cours</span>
+                            </div>
+                        </div>
+                        <button class="btn-quick-resume-play" onclick="window.gameEngine.loadSavedGame()">
+                            Reprendre ➔
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ÉCRAN DE SÉLECTION DE CLASSE -->
+            <section class="start-screen" id="start-screen" style="display: none;">
+                <div class="start-screen-nav-bar">
+                    <button class="btn-back-menu" onclick="window.gameEngine.showMainMenu()" title="Revenir au menu principal">
+                        ← Retour au Menu Principal
+                    </button>
+                </div>
+
                 <div class="game-logo-container">
                     <h1 class="game-title">Les Chroniques du Croissant Fertile</h1>
                     <div class="game-subtitle">L'Émergence d'une Civilisation</div>
@@ -189,9 +256,40 @@
                 <div class="scene-viewport" id="scene-viewport" data-mood="neutral">
                     <div class="scene-overlay-gradient"></div>
                     
-                    <div class="scene-banner">
-                        <div class="chapter-tag" id="scene-chapter-tag">Chapitre I</div>
-                        <div class="location-title" id="scene-location-title">Les Berges du Tigre et de l'Euphrate</div>
+                    <!-- CARTOUCHE & SCEAU ANTIQUE : LIEU ET PROGRESSION DU PÉRIPLE -->
+                    <div class="scene-banner" id="scene-banner">
+                        <div class="scene-cartouche" id="scene-cartouche">
+                            <div class="cartouche-seal-header">
+                                <div class="cartouche-seal-medallion" aria-hidden="true" title="Sceau de Sumer & Akkad">
+                                    <span class="seal-glyph">𒀭</span>
+                                </div>
+                                <div class="chapter-tag" id="scene-chapter-tag">Chapitre I sur V</div>
+                            </div>
+                            <div class="location-title" id="scene-location-title" title="Les Berges du Tigre et de l'Euphrate">Les Berges du Tigre et de l'Euphrate</div>
+                            <div class="cartouche-progress-beads" id="cartouche-progress-beads" role="progressbar" aria-label="Progression du périple antique (5 chapitres)" aria-valuenow="1" aria-valuemin="1" aria-valuemax="5">
+                                <div class="bead-track">
+                                    <div class="bead-item active" id="ch-step-1" data-step="1" title="Chapitre I • Origines (Agriculture & Écriture)">
+                                        <div class="bead-diamond"></div>
+                                    </div>
+                                    <div class="bead-connector"></div>
+                                    <div class="bead-item" id="ch-step-2" data-step="2" title="Chapitre II • Cités-États (Ur & Remparts)">
+                                        <div class="bead-diamond"></div>
+                                    </div>
+                                    <div class="bead-connector"></div>
+                                    <div class="bead-item" id="ch-step-3" data-step="3" title="Chapitre III • Ziggourat (Le Sanctuaire Sacré)">
+                                        <div class="bead-diamond"></div>
+                                    </div>
+                                    <div class="bead-connector"></div>
+                                    <div class="bead-item" id="ch-step-4" data-step="4" title="Chapitre IV • Babylone (Le Code de Lois d'Hammurabi)">
+                                        <div class="bead-diamond"></div>
+                                    </div>
+                                    <div class="bead-connector"></div>
+                                    <div class="bead-item" id="ch-step-5" data-step="5" title="Chapitre V • Le Nil (L'Égypte Pharaonique)">
+                                        <div class="bead-diamond"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="scene-characters" id="scene-characters">
@@ -335,6 +433,40 @@
         </div>
     </div>
 
+    <!-- MODALE DE LA SACOCHE D'ARTEFACTS HISTORIQUES -->
+    <div class="inventory-modal" id="inventory-modal" style="display: none;" role="dialog" aria-labelledby="inventory-modal-title" aria-modal="true">
+        <div class="inventory-content-wrapper">
+            <button class="codex-close-btn" id="btn-close-inventory" onclick="window.gameEngine.closeInventoryModal()" title="Fermer la sacoche">✕</button>
+            <div class="inventory-header">
+                <div class="inventory-header-title-box">
+                    <span class="inventory-header-icon">🏺</span>
+                    <div>
+                        <h3 class="inventory-title" id="inventory-modal-title">Sacoche des Reliques & Artefacts Historiques</h3>
+                        <span class="inventory-subtitle">Collection tangible des 4 objets fondateurs du Croissant Fertile (Module 3)</span>
+                    </div>
+                </div>
+                <div class="inventory-counter-pill" id="inventory-counter-pill">
+                    <span id="inventory-collected-count">0</span> / 4 Reliques Collectées
+                </div>
+            </div>
+
+            <div class="inventory-main-layout">
+                <!-- Grille des artefacts (gauche) -->
+                <div class="inventory-slots-column">
+                    <h4 class="inventory-section-label">Vos Artefacts Récupérés :</h4>
+                    <div class="inventory-grid" id="inventory-grid">
+                        <!-- Généré dynamiquement en JS -->
+                    </div>
+                </div>
+
+                <!-- Panneau d'inspection tactile 3D (droite) -->
+                <div class="inventory-inspector-panel" id="inventory-inspector-panel">
+                    <!-- Contenu de l'objet sélectionné généré en JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALE DES MÉDAILLES / SUCCÈS -->
     <div class="medals-modal" id="medals-modal" style="display: none;">
         <div class="medals-content-wrapper">
@@ -395,6 +527,255 @@
         <button class="glossary-bubble-link" id="glossary-bubble-link">Voir dans le Codex ➔</button>
     </div>
 
+    <!-- MODALE DU CHARGEMENT DE PARTIE (FICHIER MACBOOK ET LOCAL) -->
+    <div class="load-modal" id="load-game-modal" style="display: none;">
+        <div class="load-modal-card">
+            <button class="codex-close-btn" id="btn-close-load-modal" onclick="window.gameEngine.closeLoadGameModal()" title="Fermer">✕</button>
+            <div class="load-modal-header">
+                <h3 class="load-modal-title">📂 Charger une Partie</h3>
+                <p class="load-modal-subtitle">Reprenez votre aventure exactement là où vous vous étiez arrêté.</p>
+            </div>
+
+            <!-- OPTION 1 : TÉLÉVERSER UN FICHIER .JSON DU MACBOOK -->
+            <div class="load-section-box">
+                <div class="load-section-header">
+                    <span class="load-section-icon">💻</span>
+                    <div>
+                        <strong>Option 1 : Fichier de Sauvegarde MacBook (.json)</strong>
+                        <div class="load-section-desc">Sélectionnez le fichier .json téléchargé précédemment lors de votre partie.</div>
+                    </div>
+                </div>
+
+                <div class="drop-save-zone" id="drop-save-zone" onclick="document.getElementById('macbook-save-file-input').click()">
+                    <div class="drop-zone-icon">📥</div>
+                    <div class="drop-zone-main-text">Glissez-déposez votre fichier <code>.json</code> ici</div>
+                    <div class="drop-zone-sub-text">ou cliquez pour parcourir les dossiers de votre MacBook</div>
+                    <button type="button" class="btn-browse-file" onclick="event.stopPropagation(); document.getElementById('macbook-save-file-input').click()">
+                        Choisir un fichier (.json) ➔
+                    </button>
+                </div>
+                <input type="file" id="macbook-save-file-input" accept=".json,application/json" style="display: none;">
+            </div>
+
+            <!-- OPTION 2 : SAUVEGARDE LOCALE EN MÉMOIRE DU NAVIGATEUR -->
+            <div class="load-section-box">
+                <div class="load-section-header">
+                    <span class="load-section-icon">💾</span>
+                    <div>
+                        <strong>Option 2 : Dernière Sauvegarde Locale en Mémoire</strong>
+                        <div class="load-section-desc">Session enregistrée localement dans votre navigateur.</div>
+                    </div>
+                </div>
+
+                <div id="local-save-preview-card" class="local-save-card">
+                    <!-- Généré dynamiquement en JS -->
+                    <div style="color: var(--text-secondary); font-style: italic; font-size: 0.95rem;">
+                        Recherche d'une sauvegarde en mémoire...
+                    </div>
+                </div>
+            </div>
+
+            <div class="load-modal-footer">
+                <button class="hud-btn" onclick="window.gameEngine.closeLoadGameModal()">Annuler & Retour</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE DU TUTORIEL ILLUSTRÉ (COMMENT JOUER ?) -->
+    <div class="tutorial-modal" id="tutorial-modal" style="display: none;">
+        <div class="tutorial-modal-card">
+            <button class="codex-close-btn" id="btn-close-tutorial-modal" onclick="window.gameEngine.closeTutorialModal()" title="Fermer">✕</button>
+            <div class="tutorial-modal-header">
+                <div class="tutorial-title-badge">GUIDE DU JOUEUR & DES TOUCHES</div>
+                <h3 class="tutorial-modal-title">📖 Comment Jouer aux Chroniques du Croissant Fertile ?</h3>
+                <p class="tutorial-modal-subtitle">Manuel interactif illustré • Histoire de 1re Secondaire (Module 3)</p>
+            </div>
+
+            <div class="tutorial-scroll-body">
+                
+                <!-- CARTE 1 : TOUCHES & COMMANDES CLAVIER -->
+                <div class="tutorial-card">
+                    <div class="tutorial-card-header">
+                        <span class="card-icon">⌨️</span>
+                        <h4>1. Commandes & Touches de Jeu (MacBook & Clavier)</h4>
+                    </div>
+                    <p class="tutorial-card-p">
+                        Le jeu est conçu pour offrir une navigation fluide, accessible et rapide grâce à des raccourcis clavier intuitifs :
+                    </p>
+                    <div class="keys-grid">
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">Espace</kbd> <span style="font-size:0.8rem; color:var(--text-secondary);">ou</span> <kbd class="mac-key">Entrée ⏎</kbd></div>
+                            <div class="key-info">
+                                <strong>Défilement Instantané</strong>
+                                <span>Affiche tout le dialogue immédiatement sans attendre la frappe.</span>
+                            </div>
+                        </div>
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">1</kbd> <kbd class="mac-key">2</kbd> <kbd class="mac-key">3</kbd> <kbd class="mac-key">4</kbd></div>
+                            <div class="key-info">
+                                <strong>Sélection des Choix</strong>
+                                <span>Valide instantanément la décision historique correspondante.</span>
+                            </div>
+                        </div>
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">Clic Dialogue</kbd></div>
+                            <div class="key-info">
+                                <strong>Accélération du Texte</strong>
+                                <span>Cliquez sur la zone de narration pour faire apparaître le paragraphe.</span>
+                            </div>
+                        </div>
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">A-</kbd> <kbd class="mac-key">A</kbd> <kbd class="mac-key">A+</kbd> <kbd class="mac-key">A++</kbd></div>
+                            <div class="key-info">
+                                <strong>Taille de Police</strong>
+                                <span>Ajustez la taille du texte à votre vue pour un confort optimal.</span>
+                            </div>
+                        </div>
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">👓 Mode Confort</kbd></div>
+                            <div class="key-info">
+                                <strong>Police Dyslexie / Confort</strong>
+                                <span>Active une police lisible et aérée sans empattements.</span>
+                            </div>
+                        </div>
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">⚡ Vitesse</kbd></div>
+                            <div class="key-info">
+                                <strong>Vitesse de Défilement</strong>
+                                <span>Bascule entre Normal, Rapide et Affichage Instantané.</span>
+                            </div>
+                        </div>
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">↩ Relire</kbd></div>
+                            <div class="key-info">
+                                <strong>Relire la Réplique</strong>
+                                <span>Permet de relire le texte narratif précédent en cas d'hésitation.</span>
+                            </div>
+                        </div>
+                        <div class="key-item">
+                            <div class="key-display"><kbd class="mac-key">⛶ Plein Écran</kbd></div>
+                            <div class="key-info">
+                                <strong>Mode Immersion</strong>
+                                <span>Bascule le jeu en plein écran sur votre MacBook.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARTE 2 : LES 4 JAUGES DE STATUT -->
+                <div class="tutorial-card">
+                    <div class="tutorial-card-header">
+                        <span class="card-icon">⚖️</span>
+                        <h4>2. Les 4 Jauges d'Équilibre Historique</h4>
+                    </div>
+                    <p class="tutorial-card-p">
+                        Chaque décision prise influence le cours des événements et modifie vos jauges. Maintenez un équilibre pour décrocher le rang <strong>S</strong> au certificat final :
+                    </p>
+                    <div class="tutorial-gauges-grid">
+                        <div class="t-gauge-card t-savoir">
+                            <div class="t-gauge-top">
+                                <span class="t-gauge-icon">📖</span>
+                                <strong>Savoir (Bleu)</strong>
+                            </div>
+                            <p>Maîtrise de l'écriture (calculi, cunéiforme, papyrus), compréhension des sciences, des lois et du rôle des scribes.</p>
+                        </div>
+                        <div class="t-gauge-card t-influence">
+                            <div class="t-gauge-top">
+                                <span class="t-gauge-icon">👑</span>
+                                <strong>Influence (Or)</strong>
+                            </div>
+                            <p>Autorité et réputation auprès du Roi Hammourabi, de la prêtresse Enheduanna, des nobles et du peuple.</p>
+                        </div>
+                        <div class="t-gauge-card t-richesse">
+                            <div class="t-gauge-top">
+                                <span class="t-gauge-icon">🏺</span>
+                                <strong>Richesse (Vert)</strong>
+                            </div>
+                            <p>Gestion des surplus agricoles, troc fluvial sur l'Euphrate, balance commerciale (blé vs métaux).</p>
+                        </div>
+                        <div class="t-gauge-card t-destin">
+                            <div class="t-gauge-top">
+                                <span class="t-gauge-icon">✨</span>
+                                <strong>Destin (Terre Cuite)</strong>
+                            </div>
+                            <p>Harmonie de la cité, respect des dieux, équilibre des choix moraux et répercussions à long terme (Effet Papillon).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARTE 3 : CODEX HISTORIQUE, INDICES & MINI-JEUX -->
+                <div class="tutorial-card">
+                    <div class="tutorial-card-header">
+                        <span class="card-icon">📜</span>
+                        <h4>3. Le Codex Historique, les Indices & les Épreuves</h4>
+                    </div>
+                    <div class="tutorial-illus-row">
+                        <div class="tutorial-illus-item">
+                            <img src="assets/images/scene_clay_tablets.jpg" alt="Tablettes d'argile" class="t-illus-img">
+                            <div class="t-illus-caption">
+                                <strong>L'Écriture & les Calculis</strong>
+                                <span>Comprenez le passage des calculi à la numération, aux pictogrammes puis au cunéiforme.</span>
+                            </div>
+                        </div>
+                        <div class="tutorial-illus-item">
+                            <img src="assets/images/scene_babylon_market.jpg" alt="Marché de Babylone" class="t-illus-img">
+                            <div class="t-illus-caption">
+                                <strong>Le Code d'Hammourabi & le Troc</strong>
+                                <span>Rendez la justice selon la stèle royale et négociez les marchandises au marché.</span>
+                            </div>
+                        </div>
+                        <div class="tutorial-illus-item">
+                            <img src="assets/images/scene_ziggurat_ur.jpg" alt="Ziggourat d'Ur" class="t-illus-img">
+                            <div class="t-illus-caption">
+                                <strong>La Ziggourat & la Hiérarchie</strong>
+                                <span>Reconstituez les 5 échelons de la société mésopotamienne et honorez le culte.</span>
+                            </div>
+                        </div>
+                        <div class="tutorial-illus-item">
+                            <img src="assets/images/scene_egypt_nile.jpg" alt="Le Nil en Égypte" class="t-illus-img">
+                            <div class="t-illus-caption">
+                                <strong>Les Crues Fertiles du Nil</strong>
+                                <span>Maîtrisez le limon fertilisant et résolvez le puzzle d'irrigation égyptien.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="tutorial-card-p" style="margin-top: 14px;">
+                        💡 <strong>Astuce pédagogique :</strong> Consultez régulièrement le bouton <strong>Codex 📜</strong> dans la barre supérieure ! Il contient les notions révisées pour le grand examen sommatif final du Module 3.
+                    </p>
+                </div>
+
+                <!-- CARTE 4 : SAUVEGARDE SUR MACBOOK SANS AUTO-SAVE -->
+                <div class="tutorial-card">
+                    <div class="tutorial-card-header">
+                        <span class="card-icon">💾</span>
+                        <h4>4. Sauvegarde Manuelle sur MacBook (Disquette)</h4>
+                    </div>
+                    <div class="save-tutorial-box">
+                        <div class="save-tut-icon">💾</div>
+                        <div class="save-tut-text">
+                            <strong>Une liberté totale pour le joueur : Aucun Auto-Save !</strong>
+                            <p>
+                                En jeu, une icône discrète de <strong>disquette 💾</strong> est située dans le <strong>coin supérieur droit de votre écran</strong> (ainsi que dans la barre d'actions).
+                            </p>
+                            <ul>
+                                <li><strong>Cliquez sur la disquette</strong> pour sauvegarder : un fichier <code>.json</code> est instantanément généré et téléchargé sur votre MacBook.</li>
+                                <li><strong>Aucun auto-save intempestif :</strong> vos choix restent entre vos mains et aucune sauvegarde automatique n'écrase votre fichier sans votre accord.</li>
+                                <li><strong>Reprendre exactement où vous étiez :</strong> au menu principal, cliquez sur <em>Charger une Partie</em> et sélectionnez votre fichier <code>.json</code>. Le jeu restaurera vos jauges, vos indices, vos médailles et la réplique exacte de votre chapitre.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="tutorial-modal-footer">
+                <button class="btn-primary-start" onclick="window.gameEngine.closeTutorialModal()">
+                    Compris ! Retour au Menu ➔
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- OVERLAY DES MINI-JEUX & PUZZLES -->
     <div class="minigame-overlay" id="minigame-overlay" style="display: none;">
         <div class="minigame-modal" id="minigame-content">
@@ -409,8 +790,12 @@
         </div>
     </div>
 
+    <!-- CONTENEUR D'EMPILEMENT DES NOTIFICATIONS POPUP -->
+    <div class="toast-stack-container" id="toast-stack-container" aria-live="polite"></div>
+
     <!-- SCRIPTS DU JEU -->
     <script src="js/audio.js"></script>
+    <script src="js/inventory_data.js"></script>
     <script src="js/codex.js"></script>
     <script src="js/minigames.js"></script>
     <script src="js/story_data.js"></script>
